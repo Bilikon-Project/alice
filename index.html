@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alice — Herkes İçin Açık Wiki</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,300..700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/iosevka@5.1.0/index.min.css" rel="stylesheet">
+<style>
+:root {
+  --surface-base: #0D1017;
+  --surface-lift: #10141C;
+  --panel-bg: #141821;
+  --editor-line: #161A24;
+  --ui-line: #1B1F29;
+  --panel-shadow: rgba(0, 0, 0, 0.5);
+  --editor-fg: rgba(252, 248, 236, 0.74);
+  --editor-fg-strong: #FCF8EC;
+  --ui-fg: rgba(196, 214, 254, 0.42);
+  --ui-fg-soft: rgba(196, 214, 254, 0.65);
+  --border-subtle: rgba(196, 214, 254, 0.14);
+  --accent-tint: #E6B450;
+  --accent-on: #3D2B08;
+  --color-red: #F07178;
+  --color-pink: #F29668;
+  --color-orange: #FF8F40;
+  --color-peach: #E6C08A;
+  --color-yellow: #FFB454;
+  --color-green: #AAD94C;
+  --color-teal: #95E6CB;
+  --color-indigo: #39BAE6;
+  --color-blue: #59C2FF;
+  --color-purple: #D2A6FF;
+  --color-error: #D95757;
+  --corner-xs: 4px;
+  --corner-sm: 8px;
+  --corner-md: 12px;
+  --corner-lg: 16px;
+  --elev-3: 0 4px 12px var(--panel-shadow);
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --dur: 0.2s;
+  --font-sans: "Google Sans Flex", system-ui, -apple-system, sans-serif;
+  --font-mono: "Iosevka Nerd Font", "Iosevka", monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.ico {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  flex-shrink: 0;
+  fill: currentColor;
+  vertical-align: middle;
+}
+
+.ico-sm {
+  width: 17px;
+  height: 17px;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--surface-base);
+  color: var(--editor-fg);
+  min-height: 100vh;
+  line-height: 1.65;
+  font-size: 15.5px;
+  -webkit-font-smoothing: antialiased;
+}
+
+main {
+  padding: 36px 40px 104px;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.content-wrap {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+/* Dolphin Tarzı Adres Çubuğu (sadece Home) */
+.dolphin-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  margin-bottom: 14px;
+  background: var(--panel-bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--corner-sm);
+  color: var(--editor-fg-strong);
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.dolphin-bar .ico {
+  color: var(--accent-tint);
+}
+
+/* Dolphin Tarzı Dosya Görünümü (tarih ve saat yok) */
+.dolphin-view {
+  background: var(--surface-lift);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--corner-sm);
+  overflow: hidden;
+}
+
+.dolphin-cols {
+  display: grid;
+  grid-template-columns: 1fr 120px;
+  padding: 9px 16px;
+  background: var(--ui-line);
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--ui-fg-soft);
+}
+
+.dolphin-cols span:last-child {
+  text-align: right;
+  border-left: 1px solid var(--border-subtle);
+  padding-left: 12px;
+}
+
+.dolphin-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 120px;
+  align-items: center;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--editor-fg);
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: background var(--dur) var(--ease);
+}
+
+.dolphin-row:last-child {
+  border-bottom: none;
+}
+
+.dolphin-row:hover {
+  background: var(--editor-line);
+}
+
+.dolphin-name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.dolphin-icon {
+  color: var(--color-blue);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dolphin-title {
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--editor-fg-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dolphin-row:hover .dolphin-title {
+  color: var(--accent-tint);
+}
+
+.dolphin-file {
+  margin-left: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--color-teal);
+}
+
+.dolphin-size {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--ui-fg-soft);
+}
+
+.page-title {
+  font-size: 2.1rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: var(--editor-fg-strong);
+}
+
+.page-meta {
+  font-size: 0.84rem;
+  color: var(--ui-fg-soft);
+  padding-bottom: 20px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+.page-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.page-meta span:first-child {
+  font-family: var(--font-mono);
+  color: var(--color-teal);
+}
+
+.page-body {
+  font-size: 0.98rem;
+}
+
+.page-body h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--editor-fg-strong);
+  margin: 40px 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-subtle);
+  scroll-margin-top: 28px;
+}
+
+.page-body h2:first-child {
+  margin-top: 0;
+}
+
+.page-body h3 {
+  font-size: 1.22rem;
+  font-weight: 500;
+  color: var(--accent-tint);
+  margin: 28px 0 12px;
+  scroll-margin-top: 28px;
+}
+
+.page-body h4 {
+  font-size: 1.06rem;
+  font-weight: 500;
+  color: var(--color-blue);
+  margin: 20px 0 8px;
+}
+
+.page-body p {
+  margin-bottom: 14px;
+  color: var(--editor-fg);
+}
+
+.page-body ul, .page-body ol {
+  margin: 12px 0 18px 24px;
+}
+
+.page-body li {
+  margin-bottom: 8px;
+}
+
+.page-body li::marker {
+  color: var(--accent-tint);
+  font-weight: 500;
+}
+
+.page-body code {
+  background: var(--panel-bg);
+  color: var(--color-orange);
+  padding: 2px 7px;
+  border-radius: var(--corner-xs);
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+}
+
+.page-body pre {
+  background: var(--surface-base);
+  padding: 18px;
+  border-radius: var(--corner-md);
+  overflow-x: auto;
+  margin: 16px 0;
+  border: 1px solid var(--border-subtle);
+  line-height: 1.55;
+}
+
+.page-body pre code {
+  background: none;
+  color: var(--editor-fg-strong);
+  padding: 0;
+  font-size: 0.94em;
+}
+
+.page-body blockquote {
+  border-left: 4px solid var(--accent-tint);
+  padding: 12px 18px;
+  background: var(--panel-bg);
+  border-radius: 0 var(--corner-md) var(--corner-md) 0;
+  margin: 16px 0;
+  color: var(--ui-fg-soft);
+}
+
+.page-body a {
+  color: var(--color-blue);
+  text-decoration: none;
+}
+
+.page-body a:hover {
+  text-decoration: underline;
+}
+
+.page-body hr {
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+  margin: 32px 0;
+}
+
+.page-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 18px 0;
+  border-radius: var(--corner-md);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+}
+
+.page-body th, .page-body td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: left;
+}
+
+.page-body th {
+  background: var(--panel-bg);
+  color: var(--accent-tint);
+  font-weight: 500;
+}
+
+.page-body tr:last-child td {
+  border-bottom: none;
+}
+
+.fab-home {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 80;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 18px;
+  border-radius: var(--corner-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--panel-bg);
+  color: var(--editor-fg-strong);
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--elev-3);
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease), border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+
+.fab-home.visible {
+  display: inline-flex;
+}
+
+.fab-home:hover {
+  background: var(--accent-tint);
+  color: var(--accent-on);
+  border-color: var(--accent-tint);
+  transform: translateY(-2px);
+}
+
+.error-box {
+  background: var(--panel-bg);
+  border: 1px solid var(--color-error);
+  border-radius: var(--corner-lg);
+  padding: 20px;
+  margin-top: 14px;
+}
+
+.error-text {
+  color: var(--color-error);
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.error-hint {
+  color: var(--ui-fg-soft);
+  font-size: 0.92rem;
+}
+
+.error-hint code {
+  background: var(--surface-lift);
+  color: var(--accent-tint);
+  padding: 2px 7px;
+  border-radius: var(--corner-xs);
+  font-family: var(--font-mono);
+}
+
+.loader {
+  display: flex;
+  justify-content: center;
+  padding: 48px;
+}
+
+.loader::after {
+  content: "";
+  width: 34px;
+  height: 34px;
+  border: 3px solid var(--border-subtle);
+  border-top-color: var(--accent-tint);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 900px) {
+  main {
+    padding: 24px 18px 96px;
+  }
+  .fab-home {
+    right: 16px;
+    bottom: 16px;
+    padding: 10px 15px;
+  }
+}
+
+@media (max-width: 560px) {
+  .dolphin-cols,
+  .dolphin-row {
+    grid-template-columns: 1fr 78px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .dolphin-file {
+    display: none;
+  }
+}
+</style>
+</head>
+<body>
+
+<main>
+  <div class="content-wrap">
+    <div id="content"></div>
+  </div>
+</main>
+
+<button type="button" class="fab-home" id="fabHome" onclick="renderHome()" aria-label="Ana Sayfa">
+  <span id="fabHomeIcon"></span>
+  <span>Ana Sayfa</span>
+</button>
+
+<script>
+const DOCS_DIR = "docs/";
+
+const TOPIC_FILES = [
+  "arch.md",
+  "debian.md",
+  "fedora.md",
+  "gentoo.md",
+  "mint.md",
+];
+
+const ICONS = {
+  doc: `<svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>`,
+  clock: `<svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>`,
+  home: `<svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>`
+};
+
+let pages = [];
+
+document.getElementById("fabHomeIcon").innerHTML = ICONS.home;
+
+function setHomeButtonVisible(visible) {
+  document.getElementById("fabHome").classList.toggle("visible", visible);
+}
+
+function slugify(text) {
+  return text.toLowerCase()
+    .replace(/ç/g, "c").replace(/ğ/g, "g").replace(/ı/g, "i")
+    .replace(/ö/g, "o").replace(/ş/g, "s").replace(/ü/g, "u")
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "section";
+}
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function sanitizeUrl(url) {
+  const trimmed = String(url).trim();
+  if (/^(https?:\/\/|\/|\.\/|\.\.\/|#)/i.test(trimmed)) {
+    return trimmed.replace(/"/g, "%22");
+  }
+  return "#";
+}
+
+function closeOpenBlocks(state) {
+  let out = "";
+  if (state.inUl) { out += "</ul>"; state.inUl = false; }
+  if (state.inOl) { out += "</ol>"; state.inOl = false; }
+  if (state.inBQ) { out += "</blockquote>"; state.inBQ = false; }
+  if (state.inTable) { out += "</tbody></table>"; state.inTable = false; }
+  return out;
+}
+
+function parseMarkdown(text) {
+  const lines = text.split(/\r?\n/);
+  let html = "";
+  const state = { inCode: false, inUl: false, inOl: false, inBQ: false, inTable: false };
+
+  for (const line of lines) {
+    if (line.trim().startsWith("```")) {
+      if (!state.inCode) {
+        html += closeOpenBlocks(state) + "<pre><code>";
+        state.inCode = true;
+      } else {
+        html += "</code></pre>";
+        state.inCode = false;
+      }
+      continue;
+    }
+
+    if (state.inCode) {
+      html += escapeHtml(line) + "\n";
+      continue;
+    }
+
+    if (line.trim() === "") {
+      html += closeOpenBlocks(state);
+      continue;
+    }
+
+    if (line.trim().startsWith("> ")) {
+      if (state.inUl) { html += "</ul>"; state.inUl = false; }
+      if (state.inOl) { html += "</ol>"; state.inOl = false; }
+      if (state.inTable) { html += "</tbody></table>"; state.inTable = false; }
+      if (!state.inBQ) { html += "<blockquote>"; state.inBQ = true; }
+      html += "<p>" + inlineFormat(line.trim().slice(2)) + "</p>";
+      continue;
+    } else if (state.inBQ) {
+      html += "</blockquote>";
+      state.inBQ = false;
+    }
+
+    if (line.trim().startsWith("|") && line.trim().endsWith("|")) {
+      if (state.inUl) { html += "</ul>"; state.inUl = false; }
+      if (state.inOl) { html += "</ol>"; state.inOl = false; }
+      if (/^\|[\s:-]+\|(\s*[\s:-]+\|)*$/.test(line.trim())) continue;
+
+      const cells = line.trim().slice(1, -1).split("|").map(c => c.trim());
+      if (!state.inTable) {
+        html += "<table><thead><tr>" + cells.map(c => `<th>${inlineFormat(c)}</th>`).join("") + "</tr></thead><tbody>";
+        state.inTable = true;
+      } else {
+        html += "<tr>" + cells.map(c => `<td>${inlineFormat(c)}</td>`).join("") + "</tr>";
+      }
+      continue;
+    } else if (state.inTable) {
+      html += "</tbody></table>";
+      state.inTable = false;
+    }
+
+    if (line.trim() === "---" || line.trim() === "***") {
+      html += closeOpenBlocks(state) + "<hr>";
+      continue;
+    }
+
+    const hMatch = line.match(/^(#{1,6})\s+(.*)$/);
+    if (hMatch) {
+      html += closeOpenBlocks(state);
+      const level = hMatch[1].length;
+      const title = hMatch[2].trim();
+      const id = slugify(title);
+      html += `<h${level} id="${id}">${inlineFormat(title)}</h${level}>`;
+      continue;
+    }
+
+    if (/^\s*[-*+]\s+/.test(line)) {
+      if (state.inOl) { html += "</ol>"; state.inOl = false; }
+      if (!state.inUl) { html += "<ul>"; state.inUl = true; }
+      html += "<li>" + inlineFormat(line.replace(/^\s*[-*+]\s+/, "")) + "</li>";
+      continue;
+    }
+
+    if (/^\s*\d+\.\s+/.test(line)) {
+      if (state.inUl) { html += "</ul>"; state.inUl = false; }
+      if (!state.inOl) { html += "<ol>"; state.inOl = true; }
+      html += "<li>" + inlineFormat(line.replace(/^\s*\d+\.\s+/, "")) + "</li>";
+      continue;
+    }
+
+    html += closeOpenBlocks(state) + "<p>" + inlineFormat(line) + "</p>";
+  }
+
+  if (state.inCode) html += "</code></pre>";
+  html += closeOpenBlocks(state);
+
+  const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+  return { html, readTime: Math.max(1, Math.ceil(wordCount / 200)) };
+}
+
+function inlineFormat(text) {
+  const codeTokens = [];
+  let formatted = text.replace(/`([^`]+)`/g, (_, code) => {
+    const idx = codeTokens.length;
+    codeTokens.push(`<code>${escapeHtml(code)}</code>`);
+    return `@@CODE_${idx}@@`;
+  });
+
+  formatted = escapeHtml(formatted)
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*([^*]+)\*/g, "<em>$1</em>")
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, href) => {
+      const safeHref = sanitizeUrl(href.replace(/&quot;/g, '"'));
+      const extraAttrs = /^https?:\/\//i.test(safeHref) ? ' target="_blank" rel="noopener noreferrer"' : "";
+      return `<a href="${escapeHtml(safeHref)}"${extraAttrs}>${label}</a>`;
+    });
+
+  return formatted.replace(/@@CODE_(\d+)@@/g, (_, idx) => codeTokens[Number(idx)] || "");
+}
+
+function renderFetchError(errMsg) {
+  setHomeButtonVisible(true);
+  const isFileProtocol = window.location.protocol === "file:";
+  const hintHtml = isFileProtocol
+    ? `Dosyayı <code>file://</code> olarak açtığın için tarayıcı <code>docs/</code> klasöründeki dosyaları okumayı engelledi. Klasörü bir yerel sunucu ile aç (örneğin VS Code'da <strong>Live Server</strong> veya terminalde <code>python3 -m http.server</code>).`
+    : `<code>docs/</code> klasörünün ve dosyaların mevcut olduğundan emin ol.`;
+
+  document.getElementById("content").innerHTML = `
+    <h1 class="page-title error-text">Hata</h1>
+    <div class="error-box">
+      <p class="error-text">${escapeHtml(errMsg)}</p>
+      <p class="error-hint">${hintHtml}</p>
+    </div>
+  `;
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return `${bytes} B`;
+  const kb = bytes / 1024;
+  return `${kb.toFixed(1)} KiB`;
+}
+
+async function getPageMeta(file) {
+  const res = await fetch(DOCS_DIR + file);
+  if (!res.ok) throw new Error(`Dosya okunamadı (${res.status}): ${DOCS_DIR}${file}`);
+  const text = await res.text();
+  const firstH = text.match(/^#\s+(.*)$/m);
+  const bytes = new TextEncoder().encode(text).length;
+  return {
+    title: firstH ? firstH[1].trim() : file.replace(/\.(md|txt)$/i, ""),
+    sizeLabel: formatSize(bytes)
+  };
+}
+
+async function loadPages() {
+  document.getElementById("content").innerHTML = '<div class="loader"></div>';
+  try {
+    pages = await Promise.all(
+      TOPIC_FILES.map(async (file, i) => {
+        const meta = await getPageMeta(file);
+        return { id: "p" + i, dosya: file, konu: meta.title, sizeLabel: meta.sizeLabel };
+      })
+    );
+    renderHome();
+  } catch (e) {
+    renderFetchError(e.message || "Dosyalar yüklenemedi");
+  }
+}
+
+function renderHome() {
+  setHomeButtonVisible(false);
+
+  const rows = pages.map(p => `
+    <button type="button" class="dolphin-row" onclick="openPage('${p.id}')">
+      <span class="dolphin-name">
+        <span class="dolphin-icon">${ICONS.doc}</span>
+        <span class="dolphin-title">${escapeHtml(p.konu)}</span>
+        <span class="dolphin-file">${escapeHtml(p.dosya)}</span>
+      </span>
+      <span class="dolphin-size">${escapeHtml(p.sizeLabel)}</span>
+    </button>
+  `).join("");
+
+  document.getElementById("content").innerHTML = `
+    <div class="dolphin-bar">
+      ${ICONS.home}
+      <span>Home</span>
+    </div>
+    <div class="dolphin-view">
+      <div class="dolphin-cols">
+        <span>Name</span>
+        <span>Size</span>
+      </div>
+      ${rows || '<div style="padding:16px;color:var(--ui-fg-soft)">Dosya yok</div>'}
+    </div>
+  `;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+async function openPage(id) {
+  const page = pages.find(p => p.id === id);
+  if (!page) return;
+
+  setHomeButtonVisible(true);
+  const content = document.getElementById("content");
+  content.innerHTML = '<div class="loader"></div>';
+
+  try {
+    const res = await fetch(DOCS_DIR + page.dosya);
+    if (!res.ok) throw new Error(`Dosya okunamadı (${res.status}): ${DOCS_DIR}${page.dosya}`);
+    const text = await res.text();
+    const { html, readTime } = parseMarkdown(text);
+
+    content.innerHTML = `
+      <h1 class="page-title">${escapeHtml(page.konu)}</h1>
+      <div class="page-meta">
+        <span>${ICONS.doc}${escapeHtml(page.dosya)}</span>
+        <span>${ICONS.clock}~${readTime} dk okuma</span>
+      </div>
+      <div class="page-body">${html}</div>
+    `;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } catch (e) {
+    renderFetchError(e.message || "Sayfa yüklenemedi");
+  }
+}
+
+loadPages();
+</script>
+
+</body>
+</html>
