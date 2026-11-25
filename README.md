@@ -14,7 +14,7 @@ Linux ve linuxdaki her şeyi sıfırdan öğrenmek isteyenler için Türkçe, a�
 2. `index.html` içindeki `TOPIC_FILES`'a ekle
 3. Bitti.
 
-Detaylı rehber: [`docs/templates.md`](docs/templates.md)
+Detaylı rehber: [`docs/templates.md`](docs/templates.txt)
 
 ## Katkı
 
