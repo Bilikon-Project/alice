@@ -22,4 +22,4 @@ Fork'la, konu ekle, PR gönder. Kurallar için `docs/templates.md`.
 
 ## Lisans
 
-MIT
+[MIT](LICENSE)
