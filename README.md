@@ -4,7 +4,7 @@
 
 Linux ve linuxdaki her şeyi sıfırdan öğrenmek isteyenler için Türkçe, açık ve ücretsiz bir wiki.
 
-**Links:** [alice-wiki.example.com](https://alice-wiki.example.com)
+[Wikiyi buradan ziyaret edin](https://bilikon-project.github.io/alice/)
 
 ---
 
