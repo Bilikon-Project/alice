@@ -4,14 +4,16 @@ Arch Linux, "KISS" (Keep It Simple, Stupid) felsefesiyle tasarlanmış, minimal 
 Kurulum terminalden yapılır; her şey kullanıcının kontrolündedir.
 Paket yöneticisi **pacman**, kullanıcı deposu **AUR**'dur.
 
-## Gereksinimler
+> **Özet:** Arch Linux'u `archinstall` ile veya elle kurmayı, masaüstü ortamı seçmeyi, AUR üzerinden VS Code kurmayı, `pacman` komutlarını ve eski bilgisayarlar için ipuçlarını öğrenirsin.
+
+## ✅ Gereksinimler
 
 - 512 MB RAM (minimum), 2 GB+ önerilir
 - 20 GB disk alanı
 - 1 GB USB bellek
 - İnternet bağlantısı (kablolu önerilir, Wi-Fi için `iwctl` gerekir)
 
-## 1. ISO İndirme
+## 💿 1. ISO İndirme
 
 1. [archlinux.org/download](https://archlinux.org/download/) adresine git
 2. En güncel ISO'yu indir (aylık güncellenir)
@@ -19,7 +21,7 @@ Paket yöneticisi **pacman**, kullanıcı deposu **AUR**'dur.
 
 > Arch, canlı masaüstü yerine **minimal** bir kurulum ortamı sunar. Kurulum terminalden yapılır.
 
-## 2. Kurulum Yöntemi Seç
+## 🧭 2. Kurulum Yöntemi Seç
 
 Arch iki kurulum yöntemi sunar:
 
@@ -30,7 +32,7 @@ Aşağıda her iki yöntem de ayrı ayrı anlatılmıştır.
 
 ---
 
-## 2A. `archinstall` ile Kurulum (Menü Tabanlı)
+## 🧰 2A. `archinstall` ile Kurulum (Menü Tabanlı)
 
 `archinstall`, resmi ISO'da gelen menü tabanlı kurulum aracıdır. Her adımı görsel menüden seçersin.
 
@@ -52,7 +54,9 @@ Kablolu bağlantı otomatik çalışır. Wi-Fi için:
 
 ```bash
 iwctl
+device list
 station wlan0 scan
+station wlan0 get-networks
 station wlan0 connect "SSID"
 exit
 ```
@@ -70,6 +74,8 @@ archinstall
 ```
 
 ### 2A.5 Menü Adımları
+
+> Menü adları `archinstall` sürümüne göre biraz değişebilir.
 
 `archinstall` menüsünde sırayla:
 
@@ -102,7 +108,7 @@ reboot
 
 ---
 
-## 2B. Manuel Kurulum (Terminal)
+## ⌨️ 2B. Manuel Kurulum (Terminal)
 
 Her adımı elle yaparsın. Arch Wiki'deki resmi yöntemdir.
 
@@ -112,26 +118,11 @@ Bilgisayarı USB'den boot et.
 
 ### 2B.2 Klavye Düzeni
 
-```bash
-loadkeys trq
-```
+`loadkeys trq` (bkz. 2A.2).
 
 ### 2B.3 İnternet Bağlantısı
 
-Wi-Fi için:
-
-```bash
-iwctl
-station wlan0 scan
-station wlan0 connect "SSID"
-exit
-```
-
-Bağlantıyı doğrula:
-
-```bash
-ping -c 3 archlinux.org
-```
+Kablolu bağlantı otomatiktir. Wi-Fi için 2A.3'teki `iwctl` adımlarını uygula ve bağlantıyı `ping` ile doğrula.
 
 ### 2B.4 Saat Senkronizasyonu
 
@@ -154,6 +145,8 @@ fdisk /dev/sda
 | `/dev/sda1` | 512 MB | EFI | `/efi` |
 | `/dev/sda2` | 2 GB | swap | — |
 | `/dev/sda3` | Kalan | ext4 | `/` |
+
+> `fdisk` içinde `g` ile yeni GPT tablosu oluştur, EFI bölümünün türünü **EFI System**, swap'ı **Linux swap** yap ve `w` ile kaydet. Disk adını `lsblk` ile kontrol et (NVMe'de `/dev/nvme0n1p1` gibi).
 
 Dosya sistemlerini oluştur ve bağla:
 
@@ -182,6 +175,8 @@ pacstrap -K /mnt base linux linux-firmware nano sudo networkmanager grub efiboot
 ```
 
 > `linux` yerine `linux-lts` de kurabilirsin (daha kararlı).
+
+> CPU'na göre mikro kod paketini de ekle: Intel için `intel-ucode`, AMD için `amd-ucode`.
 
 ### 2B.8 fstab Oluştur
 
@@ -258,7 +253,7 @@ reboot
 
 ---
 
-## 3. Kurulum Sonrası (her iki yöntem için ortak)
+## 🔧 3. Kurulum Sonrası (her iki yöntem için ortak)
 
 ### 3.1 Güncelleme
 
@@ -291,7 +286,7 @@ sudo pacman -S plasma-meta kde-applications
 sudo systemctl enable sddm
 ```
 
-## 4. Uygulama Kurulumu
+## 📦 4. Uygulama Kurulumu
 
 ### 4.1 VLC
 
@@ -310,13 +305,15 @@ cd yay
 makepkg -si
 ```
 
+> `makepkg -si` komutunu root ile değil, normal kullanıcıyla çalıştır.
+
 Sonra:
 
 ```bash
 yay -S visual-studio-code-bin
 ```
 
-Alternatif — açık kaynak VSCodium (resmi depoda):
+Alternatif — açık kaynak derleme **Code - OSS** (resmi depoda; eklenti mağazası olarak Open VSX kullanır):
 
 ```bash
 sudo pacman -S code
@@ -334,7 +331,7 @@ sudo pacman -S git
 sudo pacman -S htop
 ```
 
-## 5. Pacman Referansı
+## 📖 5. Pacman Referansı
 
 Arch'ın paket yöneticisi **pacman**'dir.
 
@@ -350,7 +347,8 @@ Arch'ın paket yöneticisi **pacman**'dir.
 | `pacman -Si <paket>` | Paket bilgisini gösterir |
 | `pacman -Q` | Kurulu paketleri listeler |
 | `pacman -Qe` | Açıkça kurulan paketleri listeler |
-| `sudo pacman -Scc` | Paket önbelleğini temizler |
+| `sudo pacman -Scc` | Paket önbelleğini tamamen siler (rutin için önerilmez) |
+| `sudo paccache -r` | Önbellekte son 3 sürümü bırakıp eskileri siler (`pacman-contrib` gerekir) |
 | `sudo pacman -S --needed <paket>` | Zaten kuruluysa atlar |
 
 ### AUR Yardımcıları
@@ -364,20 +362,13 @@ Arch'ın paket yöneticisi **pacman**'dir.
 
 ### Örnek Senaryolar
 
-**Sistemi güncelle:**
-
-```bash
-sudo pacman -Syu
-```
-
 **Paketi tamamen kaldır:**
 
 ```bash
 sudo pacman -Rns vlc
-sudo pacman -Scc
 ```
 
-## 6. Eski Bilgisayarlar İçin
+## 🐢 6. Eski Bilgisayarlar İçin
 
 Arch minimal olduğu için hafif masaüstü ortamıyla eski cihazlarda çalışır.
 
@@ -385,20 +376,27 @@ Arch minimal olduğu için hafif masaüstü ortamıyla eski cihazlarda çalış�
 - **`linux-lts`:** `linux` yerine `linux-lts` kernel kullan.
 - **Swap:** 2 GB RAM varsa en az 2 GB swap önerilir.
 - **Gereksiz servisleri kapat:** `systemctl disable <servis>`.
-- **Önbellek temizliği:** `sudo pacman -Scc` ile paket önbelleğini düzenli temizle.
+- **Önbellek temizliği:** `sudo paccache -r` ile eski paket sürümlerini düzenli temizle (`pacman-contrib` gerekir).
 
 > Arch, eski cihazlarda **hafif masaüstü** ile çalışır. GNOME/KDE gibi ağır ortamlar 2 GB RAM'de kasar.
 
-## 7. Sık Karşılaşılan Sorunlar
+## 🛠️ 7. Sık Karşılaşılan Sorunlar
 
 ### 7.1 `pacman -Syu` "failed to commit transaction"
 
-Disk dolu olabilir veya paket çakışması vardır:
+Önce disk doluluğunu kontrol et:
 
 ```bash
 df -h
-sudo pacman -Syu --overwrite '*'
 ```
+
+Hata "exists in filesystem" gibi çakışan bir dosyayı gösteriyorsa, yalnızca o yola izin ver:
+
+```bash
+sudo pacman -Syu --overwrite '/yol/dosya'
+```
+
+> ⚠️ Her şeye izin veren `--overwrite '*'` kullanma; sistem dosyalarını bozabilir. Çözüm genelde [archlinux.org/news](https://archlinux.org/news/) duyurusunda yazar.
 
 ### 7.2 AUR paketi derlenmiyor
 
@@ -433,15 +431,17 @@ grub-mkconfig -o /boot/grub/grub.cfg
 
 ### 7.5 Anahtar halkası hatası (`invalid or corrupted package`)
 
-Anahtarları yenile:
+Anahtarları yenile (`-Sy` ve `-Su` birlikte çalıştırılmalı; tek başına `-Sy` kısmi güncellemedir):
 
 ```bash
-sudo pacman -Sy archlinux-keyring
 sudo pacman-key --init
 sudo pacman-key --populate archlinux
+sudo pacman -Sy archlinux-keyring && sudo pacman -Su
 ```
 
 ### 7.6 `archinstall` disk bölümlemede hata
+
+> ⚠️ Aşağıdaki komut diskteki **tüm veriyi siler**.
 
 Diskte eski bölümler varsa temizle:
 
@@ -451,7 +451,7 @@ wipefs -a /dev/sda
 
 ---
 
-**Son güncelleme:** 2026-11-26
+**Son güncelleme:** 2026-11-27
 **Kaynaklar:**
 - [Arch Wiki — Installation guide](https://wiki.archlinux.org/title/Installation_guide)
 - [Arch Wiki — Archinstall](https://wiki.archlinux.org/title/Archinstall)
