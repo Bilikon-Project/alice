@@ -3,14 +3,16 @@
 Linux Mint, yeni başlayanlar için en kolay Linux dağıtımlarından biridir.
 Ubuntu tabanlıdır; `apt` paket yöneticisi kutudan çıkar.
 
-## Gereksinimler
+> **Özet:** Linux Mint'i USB'ye yazıp kurmayı, kurulum sonrası güncellemeyi, VLC, VS Code, Git ve htop kurulumunu, `apt` komutlarını ve eski bilgisayarlar için ayarları öğrenirsin.
+
+## ✅ Gereksinimler
 
 - 2 GB RAM (minimum)
 - 20 GB disk alanı
 - 4 GB USB bellek
 - İnternet bağlantısı
 
-## 1. ISO İndirme
+## 💿 1. ISO İndirme
 
 1. [linuxmint.com](https://linuxmint.com) adresine git
 2. İstediğin sürümü indir
@@ -22,14 +24,14 @@ RAM miktarına göre sürüm seç:
 
 | RAM | Önerilen Sürüm |
 |-----|----------------|
-| 2 GB veya az | XFCE veya MATE |
-| 2–4 GB | XFCE |
-| 4 GB veya fazla | Cinnamon |
+| En çok 2 GB | XFCE veya MATE |
+| 2 GB'tan fazla, 4 GB'tan az | XFCE |
+| 4 GB ve üzeri | Cinnamon |
 
 > XFCE ile MATE arasında karar veremiyorsan **XFCE** ile devam et.
 > MATE hâlâ geliştiriliyor ancak XFCE daha hafif ve daha aktif.
 
-## 2. Kurulum
+## 🚀 2. Kurulum
 
 1. **USB'den başlat:** Bilgisayarı USB'den boot et.
 2. **Kurulumu başlat:** Masaüstündeki **Install Linux Mint** simgesine tıkla.
@@ -38,7 +40,7 @@ RAM miktarına göre sürüm seç:
 
 > ⚠️ Kuruluma başlamadan önce verilerini yedekle.
 
-## 3. Kurulum Sonrası
+## 🔧 3. Kurulum Sonrası
 
 Sistemi güncelle ve temizle:
 
@@ -46,7 +48,7 @@ Sistemi güncelle ve temizle:
 sudo apt update && sudo apt upgrade -y && sudo apt autoremove -y
 ```
 
-## 4. Uygulama Kurulumu
+## 📦 4. Uygulama Kurulumu
 
 ### VLC
 
@@ -98,11 +100,10 @@ Gelişmiş sistem monitörü:
 sudo apt install htop
 ```
 
-## 5. APT Referansı
+## 📖 5. APT Referansı
 
 Linux Mint, Ubuntu tabanlı olduğu için `apt` paket yöneticisi kurulu gelir.
 Aşağıdaki tablo, en sık kullanılan `apt` komutlarını **tek yerde** toplar.
-Yukarıdaki bölümlerde geçen komutlar burada **tekrar edilmez** — sadece referans olarak listelenir.
 
 | Komut | Ne yapar? |
 |-------|-----------|
@@ -129,14 +130,6 @@ Yukarıdaki bölümlerde geçen komutlar burada **tekrar edilmez** — sadece re
 
 ### Örnek Senaryolar
 
-**Sistemi güncelle ve temizle:**
-
-```bash
-sudo apt update
-sudo apt upgrade -y
-sudo apt autoremove -y
-```
-
 **Paketi tamamen kaldır:**
 
 ```bash
@@ -144,21 +137,14 @@ sudo apt purge vlc
 sudo apt autoremove -y
 ```
 
-**Bozuk bağımlılıkları onar:**
-
-```bash
-sudo apt install -f
-sudo dpkg --configure -a
-```
-
-## 6. Eski Bilgisayarlar İçin
+## 🐢 6. Eski Bilgisayarlar İçin
 
 2010 öncesi veya düşük RAM'li (2 GB altı) bilgisayarlarda kurulum sonrası kasma yaşanabilir. Aşağıdaki ayarlar masaüstü ortamına göre değişir.
 
 ### 6.1 Cinnamon
 
 - **Efektleri azalt:** Menü → Sistem Ayarları → **Efektler** → "Efektleri etkinleştir" kapat veya "Basit" modunu seç.
-- **Pencere animasyonlarını kapat:** Menü → Sistem Ayarları → **Pencereler** → "Pencere animasyonlarını etkinleştir" kapat.
+- **Pencere animasyonlarını kapat:** Menü → Sistem Ayarları → **Pencereler** → "Pencere animasyonlarını etkinleştir" kapat. (Animasyonlar takılıyorsa ilk çözüm budur.)
 - **Başlangıç uygulamalarını kıs:** Menü → Sistem Ayarları → **Başlangıç Uygulamaları** → gereksizleri kapat.
 - **Güç yönetimi:** Menü → Sistem Ayarları → **Güç Yönetimi** → uyku/ekran kapatma sürelerini uzat.
 - **Takas (swap) alanı:** 2 GB RAM varsa en az 2 GB swap önerilir (`sudo swapon --show` ile kontrol et).
@@ -187,7 +173,7 @@ sudo dpkg --configure -a
 
 > MATE hâlâ geliştiriliyor ancak XFCE kadar hafif değil. 2 GB RAM'li bilgisayarlarda XFCE daha iyi sonuç verir.
 
-## 7. Sık Karşılaşılan Sorunlar
+## 🛠️ 7. Sık Karşılaşılan Sorunlar
 
 ### 7.1 Wi-Fi görünmüyor
 
@@ -207,13 +193,20 @@ lspci -nn | grep -i network
 
 ### 7.2 APT kilidi hatası (`/var/lib/dpkg/lock-frontend`)
 
-Bu hata, başka bir `apt` işlemi çalışırken yeni komut verildiğinde görülür. Önce çalışan işlemin bitmesini bekle. Zorunluysa:
+Bu hata, başka bir `apt` işlemi (ör. Güncelleme Yöneticisi) çalışırken yeni komut verildiğinde görülür. Önce o işlemin bitmesini bekle. Hâlâ takılıysa çalışan işlemi bul:
 
 ```bash
 sudo lsof /var/lib/dpkg/lock-frontend
-sudo kill -9 <PID>
+```
+
+İşlem gerçekten takılmışsa normal şekilde sonlandır, ardından yarım kalanı tamamla:
+
+```bash
+sudo kill <PID>
 sudo dpkg --configure -a
 ```
+
+> ⚠️ `kill -9` kullanma; paket veritabanını bozabilir.
 
 ### 7.3 Kurulum sonrası siyah ekran / boot sorunu
 
@@ -236,11 +229,7 @@ alsamixer
 - `M` tuşuyla mute durumunu kontrol et.
 - `↑` / `↓` ile ses seviyesini artır.
 
-### 7.5 Cinnamon'da pencere animasyonları takılıyor
-
-Menü → Sistem Ayarları → **Efektler** → "Basit" moduna geç. Sorun devam ederse pencere animasyonlarını kapat: Sistem Ayarları → **Pencereler** → "Pencere animasyonlarını etkinleştir" kapat.
-
-### 7.6 XFCE'de panel donuyor / yanıt vermiyor
+### 7.5 XFCE'de panel donuyor / yanıt vermiyor
 
 Terminalde paneli yeniden başlat:
 
@@ -255,11 +244,11 @@ rm -rf ~/.config/xfce4/panel
 xfce4-panel &
 ```
 
-### 7.7 MATE'de tema / simge bozuldu
+### 7.6 MATE'de tema / simge bozuldu
 
 Temayı sıfırla: Menü → Tercihler → **MATE Ayarları** → **Görünüm** → varsayılan temayı seç. Simgeler için **Arayüz** sekmesinden varsayılan simge setini seç.
 
-### 7.8 Ekran parlaklığı ayarlanmıyor
+### 7.7 Ekran parlaklığı ayarlanmıyor
 
 Bazı eski laptoplarda parlaklık tuşları çalışmaz. Çözüm:
 
@@ -278,8 +267,7 @@ sudo update-grub
 
 ---
 
+**Son güncelleme:** 2026-11-27
 **Kaynaklar:**
 - [Linux Mint Resmi Dokümantasyon](https://linuxmint.com/documentation.php)
-- [Linux Mint Kurulum Rehberi](https://linuxmint.com/documentation/user-guide)
-- [Linux Mint Forums](https://forums.linuxmint.com/)
-- [Linux Mint Blog](https://blog.linuxmint.com/)
+- [Linux Mint Kurulum Rehberi](https://linuxmint-installation-guide.readthedocs.io/)
