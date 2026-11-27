@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Alice — Herkes İçin Açık Wiki</title>
+<meta name="description" content="Alice: Linux öğrenmek isteyenler için Türkçe, açık ve ücretsiz wiki.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,300..700&display=swap" rel="stylesheet">
@@ -18,8 +19,8 @@
   --panel-shadow: rgba(0, 0, 0, 0.5);
   --editor-fg: rgba(252, 248, 236, 0.74);
   --editor-fg-strong: #FCF8EC;
-  --ui-fg: rgba(196, 214, 254, 0.42);
-  --ui-fg-soft: rgba(196, 214, 254, 0.65);
+  --ui-fg: rgba(196, 214, 254, 0.58);
+  --ui-fg-soft: rgba(196, 214, 254, 0.76);
   --border-subtle: rgba(196, 214, 254, 0.14);
   --accent-tint: #E6B450;
   --accent-on: #3D2B08;
@@ -314,6 +315,120 @@ main {
   color: var(--ui-fg-soft);
 }
 
+.page-body blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+.page-body blockquote.callout-summary {
+  border-left-color: var(--color-teal);
+  background: rgba(149, 230, 203, 0.07);
+  color: var(--editor-fg);
+}
+
+.page-body blockquote.callout-warn {
+  border-left-color: var(--color-red);
+  background: rgba(240, 113, 120, 0.09);
+  color: var(--editor-fg);
+}
+
+.page-body blockquote.callout-note {
+  border-left-color: var(--color-blue);
+  background: rgba(89, 194, 255, 0.07);
+}
+
+.code-block {
+  position: relative;
+  margin: 16px 0;
+}
+
+.code-block pre {
+  margin: 0;
+  padding-right: 92px;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 4px 10px;
+  border-radius: var(--corner-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--panel-bg);
+  color: var(--ui-fg-soft);
+  font-family: var(--font-sans);
+  font-size: 0.76rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease), color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+
+.code-block:hover .copy-btn,
+.copy-btn:focus-visible,
+.copy-btn.done {
+  opacity: 1;
+}
+
+.copy-btn:hover,
+.copy-btn.done {
+  color: var(--accent-tint);
+  border-color: var(--accent-tint);
+}
+
+@media (hover: none) {
+  .copy-btn { opacity: 1; }
+}
+
+.hero {
+  margin-bottom: 22px;
+}
+
+.hero-title {
+  font-size: 2.4rem;
+  font-weight: 600;
+  color: var(--editor-fg-strong);
+  line-height: 1.2;
+}
+
+.hero-sub {
+  color: var(--ui-fg-soft);
+  margin-top: 4px;
+}
+
+.crumbs {
+  margin-bottom: 26px;
+}
+
+.crumb-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--editor-fg-strong);
+  font: inherit;
+  cursor: pointer;
+}
+
+.crumb-home:hover {
+  color: var(--accent-tint);
+}
+
+.crumb-sep {
+  color: var(--ui-fg);
+}
+
+.crumb-file {
+  font-family: var(--font-mono);
+  color: var(--color-teal);
+  font-size: 0.88rem;
+}
+
+.toc a.active {
+  color: var(--accent-tint);
+  font-weight: 500;
+}
+
 .page-body a {
   color: var(--color-blue);
   text-decoration: none;
@@ -329,13 +444,16 @@ main {
   margin: 32px 0;
 }
 
+.page-body .table-wrap {
+  margin: 18px 0;
+  border-radius: var(--corner-md);
+  overflow-x: auto;
+  border: 1px solid var(--border-subtle);
+}
+
 .page-body table {
   width: 100%;
   border-collapse: collapse;
-  margin: 18px 0;
-  border-radius: var(--corner-md);
-  overflow: hidden;
-  border: 1px solid var(--border-subtle);
 }
 
 .page-body th, .page-body td {
@@ -352,6 +470,69 @@ main {
 
 .page-body tr:last-child td {
   border-bottom: none;
+}
+
+.content-wrap.has-toc {
+  max-width: 1240px;
+}
+
+.page-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 40px;
+}
+
+.toc {
+  display: none;
+}
+
+.toc-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ui-fg);
+  margin-bottom: 10px;
+}
+
+.toc a {
+  display: block;
+  padding: 4px 0;
+  color: var(--ui-fg-soft);
+  text-decoration: none;
+  line-height: 1.4;
+}
+
+.toc a.sub {
+  padding-left: 14px;
+  font-size: 0.82rem;
+}
+
+.toc a:hover {
+  color: var(--accent-tint);
+}
+
+@media (min-width: 1200px) {
+  .page-layout {
+    grid-template-columns: minmax(0, 1fr) 240px;
+  }
+  .toc {
+    display: block;
+    position: sticky;
+    top: 28px;
+    align-self: start;
+    max-height: calc(100vh - 56px);
+    overflow-y: auto;
+    font-size: 0.86rem;
+    border-left: 1px solid var(--border-subtle);
+    padding-left: 16px;
+  }
+}
+
+.dolphin-row:focus-visible,
+.fab-home:focus-visible {
+  outline: 2px solid var(--accent-tint);
+  outline-offset: -2px;
 }
 
 .fab-home {
@@ -460,12 +641,12 @@ main {
 <body>
 
 <main>
-  <div class="content-wrap">
+  <div class="content-wrap" id="wrap">
     <div id="content"></div>
   </div>
 </main>
 
-<button type="button" class="fab-home" id="fabHome" onclick="renderHome()" aria-label="Ana Sayfa">
+<button type="button" class="fab-home" id="fabHome" onclick="goHome()" aria-label="Ana Sayfa">
   <span id="fabHomeIcon"></span>
   <span>Ana Sayfa</span>
 </button>
@@ -479,6 +660,7 @@ const TOPIC_FILES = [
   "fedora.md",
   "gentoo.md",
   "mint.md",
+  "templates.md",
 ];
 
 const ICONS = {
@@ -518,34 +700,46 @@ function sanitizeUrl(url) {
   return "#";
 }
 
+function calloutClass(text) {
+  if (/^\*\*Özet:?\*\*/.test(text)) return "callout-summary";
+  if (/^(⚠|\*\*(Uyarı|Önemli):?\*\*)/.test(text)) return "callout-warn";
+  if (/^(\*\*(Not|İpucu):?\*\*|İpucu:)/.test(text)) return "callout-note";
+  return "";
+}
+
 function closeOpenBlocks(state) {
   let out = "";
   if (state.inUl) { out += "</ul>"; state.inUl = false; }
   if (state.inOl) { out += "</ol>"; state.inOl = false; }
   if (state.inBQ) { out += "</blockquote>"; state.inBQ = false; }
-  if (state.inTable) { out += "</tbody></table>"; state.inTable = false; }
+  if (state.inTable) { out += "</tbody></table></div>"; state.inTable = false; }
   return out;
 }
 
 function parseMarkdown(text) {
   const lines = text.split(/\r?\n/);
   let html = "";
-  const state = { inCode: false, inUl: false, inOl: false, inBQ: false, inTable: false };
+  const state = { inCode: false, fenceLen: 0, inUl: false, inOl: false, inBQ: false, inTable: false, skippedH1: false };
+  const toc = [];
+  const seenIds = {};
 
   for (const line of lines) {
-    if (line.trim().startsWith("```")) {
-      if (!state.inCode) {
-        html += closeOpenBlocks(state) + "<pre><code>";
-        state.inCode = true;
-      } else {
-        html += "</code></pre>";
+    const fence = line.trim().match(/^(`{3,})(.*)$/);
+
+    if (state.inCode) {
+      if (fence && fence[1].length >= state.fenceLen && fence[2].trim() === "") {
+        html += "</code></pre></div>";
         state.inCode = false;
+      } else {
+        html += escapeHtml(line) + "\n";
       }
       continue;
     }
 
-    if (state.inCode) {
-      html += escapeHtml(line) + "\n";
+    if (fence) {
+      html += closeOpenBlocks(state) + '<div class="code-block"><button type="button" class="copy-btn" aria-label="Kodu kopyala">Kopyala</button><pre><code>';
+      state.inCode = true;
+      state.fenceLen = fence[1].length;
       continue;
     }
 
@@ -557,8 +751,12 @@ function parseMarkdown(text) {
     if (line.trim().startsWith("> ")) {
       if (state.inUl) { html += "</ul>"; state.inUl = false; }
       if (state.inOl) { html += "</ol>"; state.inOl = false; }
-      if (state.inTable) { html += "</tbody></table>"; state.inTable = false; }
-      if (!state.inBQ) { html += "<blockquote>"; state.inBQ = true; }
+      if (state.inTable) { html += "</tbody></table></div>"; state.inTable = false; }
+      if (!state.inBQ) {
+        const cls = calloutClass(line.trim().slice(2));
+        html += cls ? `<blockquote class="${cls}">` : "<blockquote>";
+        state.inBQ = true;
+      }
       html += "<p>" + inlineFormat(line.trim().slice(2)) + "</p>";
       continue;
     } else if (state.inBQ) {
@@ -573,14 +771,14 @@ function parseMarkdown(text) {
 
       const cells = line.trim().slice(1, -1).split("|").map(c => c.trim());
       if (!state.inTable) {
-        html += "<table><thead><tr>" + cells.map(c => `<th>${inlineFormat(c)}</th>`).join("") + "</tr></thead><tbody>";
+        html += "<div class=\"table-wrap\"><table><thead><tr>" + cells.map(c => `<th>${inlineFormat(c)}</th>`).join("") + "</tr></thead><tbody>";
         state.inTable = true;
       } else {
         html += "<tr>" + cells.map(c => `<td>${inlineFormat(c)}</td>`).join("") + "</tr>";
       }
       continue;
     } else if (state.inTable) {
-      html += "</tbody></table>";
+      html += "</tbody></table></div>";
       state.inTable = false;
     }
 
@@ -594,7 +792,11 @@ function parseMarkdown(text) {
       html += closeOpenBlocks(state);
       const level = hMatch[1].length;
       const title = hMatch[2].trim();
-      const id = slugify(title);
+      if (level === 1 && !state.skippedH1) { state.skippedH1 = true; continue; }
+      const base = "h-" + slugify(title);
+      seenIds[base] = (seenIds[base] || 0) + 1;
+      const id = seenIds[base] > 1 ? `${base}-${seenIds[base]}` : base;
+      if (level === 2 || level === 3) toc.push({ level, id, title: title.replace(/[`*]/g, "") });
       html += `<h${level} id="${id}">${inlineFormat(title)}</h${level}>`;
       continue;
     }
@@ -608,7 +810,7 @@ function parseMarkdown(text) {
 
     if (/^\s*\d+\.\s+/.test(line)) {
       if (state.inUl) { html += "</ul>"; state.inUl = false; }
-      if (!state.inOl) { html += "<ol>"; state.inOl = true; }
+      if (!state.inOl) { html += `<ol start="${parseInt(line.trim(), 10)}">`; state.inOl = true; }
       html += "<li>" + inlineFormat(line.replace(/^\s*\d+\.\s+/, "")) + "</li>";
       continue;
     }
@@ -616,11 +818,11 @@ function parseMarkdown(text) {
     html += closeOpenBlocks(state) + "<p>" + inlineFormat(line) + "</p>";
   }
 
-  if (state.inCode) html += "</code></pre>";
+  if (state.inCode) html += "</code></pre></div>";
   html += closeOpenBlocks(state);
 
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
-  return { html, readTime: Math.max(1, Math.ceil(wordCount / 200)) };
+  return { html, toc, readTime: Math.max(1, Math.ceil(wordCount / 200)) };
 }
 
 function inlineFormat(text) {
@@ -644,7 +846,7 @@ function inlineFormat(text) {
 }
 
 function renderFetchError(errMsg) {
-  setHomeButtonVisible(true);
+  setHomeButtonVisible(pages.length > 0);
   const isFileProtocol = window.location.protocol === "file:";
   const hintHtml = isFileProtocol
     ? `Dosyayı <code>file://</code> olarak açtığın için tarayıcı <code>docs/</code> klasöründeki dosyaları okumayı engelledi. Klasörü bir yerel sunucu ile aç (örneğin VS Code'da <strong>Live Server</strong> veya terminalde <code>python3 -m http.server</code>).`
@@ -665,6 +867,10 @@ function formatSize(bytes) {
   return `${kb.toFixed(1)} KiB`;
 }
 
+function pageSlug(file) {
+  return file.replace(/\.(md|txt)$/i, "");
+}
+
 async function getPageMeta(file) {
   const res = await fetch(DOCS_DIR + file);
   if (!res.ok) throw new Error(`Dosya okunamadı (${res.status}): ${DOCS_DIR}${file}`);
@@ -672,31 +878,60 @@ async function getPageMeta(file) {
   const firstH = text.match(/^#\s+(.*)$/m);
   const bytes = new TextEncoder().encode(text).length;
   return {
-    title: firstH ? firstH[1].trim() : file.replace(/\.(md|txt)$/i, ""),
+    text,
+    title: firstH ? firstH[1].trim() : pageSlug(file),
     sizeLabel: formatSize(bytes)
   };
 }
 
+let loadErrors = [];
+
 async function loadPages() {
   document.getElementById("content").innerHTML = '<div class="loader"></div>';
-  try {
-    pages = await Promise.all(
-      TOPIC_FILES.map(async (file, i) => {
-        const meta = await getPageMeta(file);
-        return { id: "p" + i, dosya: file, konu: meta.title, sizeLabel: meta.sizeLabel };
-      })
-    );
-    renderHome();
-  } catch (e) {
-    renderFetchError(e.message || "Dosyalar yüklenemedi");
+  const results = await Promise.allSettled(TOPIC_FILES.map(getPageMeta));
+  pages = [];
+  loadErrors = [];
+  results.forEach((r, i) => {
+    const file = TOPIC_FILES[i];
+    if (r.status === "fulfilled") {
+      pages.push({
+        slug: pageSlug(file),
+        dosya: file,
+        konu: r.value.title,
+        sizeLabel: r.value.sizeLabel,
+        text: r.value.text
+      });
+    } else {
+      loadErrors.push(r.reason && r.reason.message ? r.reason.message : file);
+    }
+  });
+  if (!pages.length) {
+    renderFetchError(loadErrors[0] || "Dosyalar yüklenemedi");
+    return;
   }
+  route();
+}
+
+function route() {
+  let slug = "";
+  try { slug = decodeURIComponent(location.hash.slice(1)); } catch (e) { slug = ""; }
+  const page = pages.find(p => p.slug === slug);
+  if (page) showPage(page); else renderHome();
+}
+
+function goHome() {
+  if (location.hash) location.hash = "";
+  else renderHome();
 }
 
 function renderHome() {
   setHomeButtonVisible(false);
+  if (tocObserver) { tocObserver.disconnect(); tocObserver = null; }
+  document.title = "Alice — Herkes İçin Açık Wiki";
+  document.getElementById("wrap").classList.remove("has-toc");
 
   const rows = pages.map(p => `
-    <button type="button" class="dolphin-row" onclick="openPage('${p.id}')">
+    <button type="button" class="dolphin-row" onclick="location.hash='${escapeHtml(p.slug)}'">
       <span class="dolphin-name">
         <span class="dolphin-icon">${ICONS.doc}</span>
         <span class="dolphin-title">${escapeHtml(p.konu)}</span>
@@ -706,7 +941,15 @@ function renderHome() {
     </button>
   `).join("");
 
+  const warn = loadErrors.length
+    ? `<div class="error-box"><p class="error-text">Bazı dosyalar yüklenemedi:</p><p class="error-hint">${loadErrors.map(escapeHtml).join("<br>")}</p></div>`
+    : "";
+
   document.getElementById("content").innerHTML = `
+    <header class="hero">
+      <h1 class="hero-title">Alice 🐇</h1>
+      <p class="hero-sub">Herkes için Linux wiki. Türkçe, açık ve ücretsiz.</p>
+    </header>
     <div class="dolphin-bar">
       ${ICONS.home}
       <span>Home</span>
@@ -718,37 +961,103 @@ function renderHome() {
       </div>
       ${rows || '<div style="padding:16px;color:var(--ui-fg-soft)">Dosya yok</div>'}
     </div>
+    ${warn}
   `;
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-async function openPage(id) {
-  const page = pages.find(p => p.id === id);
-  if (!page) return;
+let tocObserver = null;
 
-  setHomeButtonVisible(true);
-  const content = document.getElementById("content");
-  content.innerHTML = '<div class="loader"></div>';
-
-  try {
-    const res = await fetch(DOCS_DIR + page.dosya);
-    if (!res.ok) throw new Error(`Dosya okunamadı (${res.status}): ${DOCS_DIR}${page.dosya}`);
-    const text = await res.text();
-    const { html, readTime } = parseMarkdown(text);
-
-    content.innerHTML = `
-      <h1 class="page-title">${escapeHtml(page.konu)}</h1>
-      <div class="page-meta">
-        <span>${ICONS.doc}${escapeHtml(page.dosya)}</span>
-        <span>${ICONS.clock}~${readTime} dk okuma</span>
-      </div>
-      <div class="page-body">${html}</div>
-    `;
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  } catch (e) {
-    renderFetchError(e.message || "Sayfa yüklenemedi");
-  }
+function setActiveToc(id) {
+  document.querySelectorAll(".toc a").forEach(a => {
+    const on = a.dataset.target === id;
+    a.classList.toggle("active", on);
+    if (on) a.scrollIntoView({ block: "nearest" });
+  });
 }
+
+function startScrollSpy() {
+  if (tocObserver) { tocObserver.disconnect(); tocObserver = null; }
+  if (typeof IntersectionObserver === "undefined") return;
+  tocObserver = new IntersectionObserver(entries => {
+    entries.forEach(en => { if (en.isIntersecting) setActiveToc(en.target.id); });
+  }, { rootMargin: "0px 0px -70% 0px" });
+  document.querySelectorAll(".page-body h2, .page-body h3").forEach(h => tocObserver.observe(h));
+}
+
+function showPage(page) {
+  setHomeButtonVisible(true);
+  const { html, toc, readTime } = parseMarkdown(page.text);
+  document.title = `${page.konu} — Alice`;
+  document.getElementById("wrap").classList.toggle("has-toc", toc.length > 0);
+
+  const tocHtml = toc.length
+    ? `<nav class="toc" aria-label="İçindekiler">
+        <div class="toc-title">İçindekiler</div>
+        ${toc.map(h => `<a href="#" class="${h.level === 3 ? "sub" : ""}" data-target="${h.id}">${escapeHtml(h.title)}</a>`).join("")}
+      </nav>`
+    : "";
+
+  document.getElementById("content").innerHTML = `
+    <div class="dolphin-bar crumbs">
+      <button type="button" class="crumb-home" onclick="goHome()">${ICONS.home}<span>Home</span></button>
+      <span class="crumb-sep">/</span>
+      <span class="crumb-file">${escapeHtml(page.dosya)}</span>
+    </div>
+    <div class="page-layout">
+      <article>
+        <h1 class="page-title">${escapeHtml(page.konu)}</h1>
+        <div class="page-meta">
+          <span>${ICONS.clock}~${readTime} dk okuma</span>
+        </div>
+        <div class="page-body">${html}</div>
+      </article>
+      ${tocHtml}
+    </div>
+  `;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  if (toc.length) startScrollSpy();
+}
+
+function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text);
+  }
+  return new Promise((resolve, reject) => {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy") ? resolve() : reject(); } catch (e) { reject(e); }
+    document.body.removeChild(ta);
+  });
+}
+
+document.getElementById("content").addEventListener("click", e => {
+  const btn = e.target.closest(".copy-btn");
+  if (!btn) return;
+  const code = btn.parentElement.querySelector("code");
+  copyText(code ? code.textContent : "").then(() => {
+    btn.textContent = "Kopyalandı";
+    btn.classList.add("done");
+    setTimeout(() => { btn.textContent = "Kopyala"; btn.classList.remove("done"); }, 1600);
+  }).catch(() => {
+    btn.textContent = "Kopyalanamadı";
+    setTimeout(() => { btn.textContent = "Kopyala"; }, 1600);
+  });
+});
+
+document.getElementById("content").addEventListener("click", e => {
+  const a = e.target.closest("a[data-target]");
+  if (!a) return;
+  e.preventDefault();
+  const el = document.getElementById(a.dataset.target);
+  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+window.addEventListener("hashchange", route);
 
 loadPages();
 </script>
