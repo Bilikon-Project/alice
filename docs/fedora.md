@@ -4,14 +4,16 @@ Fedora, Red Hat tarafından desteklenen, yenilikçi ve modern bir Linux dağıt�
 Wayland, PipeWire, GNOME gibi yeni teknolojileri ilk benimseyenlerdendir.
 Paket yöneticisi **dnf**, paket formatı **`.rpm`**'dir.
 
-## Gereksinimler
+> **Özet:** Fedora'yı USB'ye yazıp GUI veya metin modunda kurmayı, RPM Fusion ve codec ayarlarını, VLC, VS Code, Git ve htop kurulumunu, `dnf` komutlarını ve eski bilgisayarlar için ipuçlarını öğrenirsin.
+
+## ✅ Gereksinimler
 
 - 2 GB RAM (minimum), 4 GB+ önerilir
 - 20 GB disk alanı
 - 4 GB USB bellek
 - İnternet bağlantısı
 
-## 1. ISO İndirme
+## 💿 1. ISO İndirme
 
 1. [fedoraproject.org/workstation/download](https://fedoraproject.org/workstation/download) adresine git
 2. **Fedora Workstation** (GNOME) veya **Fedora Spins** (XFCE, KDE, MATE vb.) seç
@@ -20,26 +22,28 @@ Paket yöneticisi **dnf**, paket formatı **`.rpm`**'dir.
 
 > Fedora, **Workstation** (GNOME), **KDE Plasma**, **XFCE**, **MATE**, **Cinnamon** gibi farklı sürümler sunar. Yeni başlayanlar için Workstation önerilir.
 
-## 2. Kurulum Yöntemi Seç
+## 🧭 2. Kurulum Yöntemi Seç
 
 Fedora, **Anaconda** adlı kurulum aracını kullanır. İki modu vardır:
 
-- **GUI (Graphical):** Görsel sihirbaz, yeni başlayanlar için önerilir.
-- **TUI (Text):** Metin tabanlı, terminal sevenler için.
+- **GUI (Graphical):** Workstation Live ISO'da gelir (Fedora 42'den beri web tabanlı yeni arayüz). Yeni başlayanlar için önerilir.
+- **TUI (Text):** Metin tabanlı. Workstation Live ISO'da menüsü yoktur; **Everything (netinstall)** veya Server DVD gibi kurulum ISO'larında `inst.text` ile açılır.
 
 Aşağıda her iki yöntem de ayrı ayrı anlatılmıştır.
 
 ---
 
-## 2A. GUI ile Kurulum (Anaconda Graphical)
+## 🖥️ 2A. GUI ile Kurulum (Anaconda Graphical)
+
+> Arayüz Fedora sürümüne göre değişebilir; adımların mantığı aynıdır (dil/klavye → disk → hesap → kur).
 
 ### 2A.1 USB'den Başlat
 
-Bilgisayarı USB'den boot et. Fedora kurulum ekranı açılır.
+Bilgisayarı USB'den boot et ve GRUB menüsünden **Start Fedora-Workstation-Live** seçeneğini seç.
 
 ### 2A.2 Kurulumu Başlat
 
-**Install to Hard Drive** seçeneğine tıkla.
+Açılan karşılama penceresinde **Install Fedora Linux** seçeneğine tıkla.
 
 ### 2A.3 Dil ve Klavye
 
@@ -71,11 +75,13 @@ Yeniden başlat. İlk açılışta GNOME kurulum sihirbazı çıkar.
 
 ---
 
-## 2B. Terminal ile Kurulum (Anaconda Text)
+## ⌨️ 2B. Terminal ile Kurulum (Anaconda Text)
 
 ### 2B.1 USB'den Başlat
 
-Bilgisayarı USB'den boot et. GRUB menüsünde **Install Fedora in text mode** seçeneğini seç.
+**Everything (netinstall)** veya Server DVD ISO'suyla boot et. GRUB menüsünde `e` tuşuna bas, `linux` ile başlayan satırın sonuna `inst.text` ekle ve `Ctrl+X` ile başlat.
+
+> Metin modunda elle bölümleme sınırlıdır; gelişmiş bölümleme gerekiyorsa GUI kullan.
 
 ### 2B.2 Dil ve Klavye
 
@@ -116,7 +122,7 @@ Kurulum bitince **Reboot** seç.
 
 ---
 
-## 3. Kurulum Sonrası (her iki yöntem için ortak)
+## 🔧 3. Kurulum Sonrası (her iki yöntem için ortak)
 
 ### 3.1 Güncelleme
 
@@ -129,28 +135,30 @@ sudo dnf upgrade --refresh
 Fedora, telif hakkı nedeniyle bazı paketleri (codec, sürücü) resmi depoda sunmaz. **RPM Fusion** ekle:
 
 ```bash
-sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
-sudo dnf install https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+sudo dnf install https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+sudo dnf install https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 ```
 
 ### 3.3 Codec Kurulumu
 
-Video/ses codec'leri:
+Video/ses codec'leri (önce 3.2'yi tamamla; tam `ffmpeg` RPM Fusion `free` deposundan gelir):
 
 ```bash
-sudo dnf groupupdate multimedia --setop="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin
-sudo dnf groupupdate sound-and-video
+sudo dnf group install multimedia
+sudo dnf swap ffmpeg-free ffmpeg --allowerasing
 ```
+
+> Fedora 41'den beri DNF5 kullanılır. Eski `dnf groupupdate` ve `dnf groupinstall` yerine `dnf group install` yazılır.
 
 ### 3.4 Flatpak (varsayılan olarak gelir)
 
 Flathub'ı ekle:
 
 ```bash
-flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 ```
 
-## 4. Uygulama Kurulumu
+## 📦 4. Uygulama Kurulumu
 
 ### 4.1 VLC
 
@@ -205,7 +213,7 @@ sudo dnf install git
 sudo dnf install htop
 ```
 
-## 5. DNF Referansı
+## 📖 5. DNF Referansı
 
 Fedora'nın paket yöneticisi **dnf**'dir.
 
@@ -225,17 +233,9 @@ Fedora'nın paket yöneticisi **dnf**'dir.
 | `sudo dnf group install "<grup>"` | Paket grubu kurar |
 | `sudo dnf clean all` | Önbelleği temizler |
 | `sudo dnf history` | İşlem geçmişini gösterir |
-| `sudo dnf history undo <id>` | Son işlemi geri alır |
+| `sudo dnf history undo <id>` | Belirtilen işlemi geri alır |
 
 ### Örnek Senaryolar
-
-**Sistemi güncelle ve temizle:**
-
-```bash
-sudo dnf upgrade --refresh
-sudo dnf autoremove
-sudo dnf clean all
-```
 
 **Paketi tamamen kaldır:**
 
@@ -251,7 +251,7 @@ sudo dnf history
 sudo dnf history undo 5
 ```
 
-## 6. Eski Bilgisayarlar İçin
+## 🐢 6. Eski Bilgisayarlar İçin
 
 Fedora, GNOME ile ağır olabilir. Hafif sürümler tercih edilmeli.
 
@@ -263,7 +263,7 @@ Fedora, GNOME ile ağır olabilir. Hafif sürümler tercih edilmeli.
 
 > Fedora, GNOME ile 4 GB RAM altında kasar. XFCE/LXQt spin'leri eski cihazlar için daha uygun.
 
-## 7. Sık Karşılaşılan Sorunlar
+## 🛠️ 7. Sık Karşılaşılan Sorunlar
 
 ### 7.1 `dnf` "failed to synchronize cache"
 
@@ -293,6 +293,8 @@ sudo dnf install linux-firmware
 sudo dnf install akmod-wl   # Broadcom için
 ```
 
+> `akmod-wl` RPM Fusion `nonfree` deposundadır (bkz. 3.2).
+
 ### 7.4 NVIDIA sürücüsü
 
 RPM Fusion `nonfree` ekledikten sonra:
@@ -304,17 +306,20 @@ sudo dnf install xorg-x11-drv-nvidia-cuda
 
 Yeniden başlat.
 
+> ⚠️ Secure Boot açıksa sürücü modülü yüklenmez. Secure Boot'u kapat veya modülü imzala.
+
 ### 7.5 Wayland sorun çıkarıyor
 
 Giriş ekranında oturum türünü **X11** olarak değiştir (GNOME giriş ekranında dişli ikonu).
 
 ### 7.6 `dnf upgrade` çok yavaş
 
-En hızlı aynayı seç:
+Paralel indirmeyi artır:
 
 ```bash
-sudo dnf install dnf-plugins-core
-sudo dnf config-manager --setopt=fastestmirror=True --save
+sudo nano /etc/dnf/dnf.conf
+# [main] bölümüne şu satırı ekle:
+# max_parallel_downloads=10
 ```
 
 ### 7.7 Flatpak uygulaması açılmıyor
@@ -337,7 +342,7 @@ ile diskleri listele ve doğru diski seç.
 
 ---
 
-**Son güncelleme:** 2026-11-26
+**Son güncelleme:** 2026-11-27
 **Kaynaklar:**
 - [Fedora Docs — Installation Guide](https://docs.fedoraproject.org/en-US/fedora/latest/install-guide/)
 - [Fedora Docs — Anaconda](https://docs.fedoraproject.org/en-US/anaconda/)
