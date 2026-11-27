@@ -1,6 +1,5 @@
 # Yeni Wiki Sayfası Nasıl Yazılır
 
-Bu sayfa, Alice Wiki için yeni bir konu dosyasının nasıl yazılacağını anlatır.
 **Kural:** Bir konu = `docs/` klasöründe bir `.md` dosyası.
 
 ## 1. Dosyayı Oluştur
@@ -17,6 +16,7 @@ const TOPIC_FILES = [
   "arch.md",
   "gentoo.md",
   "templates.md",
+  "opensuse.md"
 ];
 ```
 
