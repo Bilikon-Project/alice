@@ -4,14 +4,16 @@ Debian, "rock solid" (kaya gibi sağlam) kararlılığıyla bilinen, en eski ve 
 Ubuntu, Linux Mint, Pop!_OS gibi dağıtımlar Debian tabanlıdır.
 Paket yöneticisi **apt**, paket formatı **`.deb`**'dir.
 
-## Gereksinimler
+> **Özet:** Debian'ı USB'ye yazıp GUI veya terminal ile kurmayı, `sudo` ve depo ayarlarını, VLC, VS Code, Git ve htop kurulumunu, `apt` komutlarını ve eski bilgisayarlar için ipuçlarını öğrenirsin.
+
+## ✅ Gereksinimler
 
 - 512 MB RAM (masaüstü için 2 GB+ önerilir)
 - 10 GB disk alanı (masaüstü için 20 GB+)
 - 4 GB USB bellek
 - İnternet bağlantısı
 
-## 1. ISO İndirme
+## 💿 1. ISO İndirme
 
 1. [debian.org/download](https://www.debian.org/download) adresine git
 2. **Stable** sürümü indir (kararlılık için önerilir)
@@ -20,7 +22,7 @@ Paket yöneticisi **apt**, paket formatı **`.deb`**'dir.
 
 > Debian üç kanal sunar: **Stable** (kararlı), **Testing** (test), **Unstable/Sid** (geliştirme). Yeni başlayanlar **Stable** kullanmalı.
 
-## 2. Kurulum Yöntemi Seç
+## 🧭 2. Kurulum Yöntemi Seç
 
 Debian iki kurulum yöntemi sunar:
 
@@ -31,7 +33,7 @@ Aşağıda her iki yöntem de ayrı ayrı anlatılmıştır.
 
 ---
 
-## 2A. GUI ile Kurulum (Graphical install)
+## 🖥️ 2A. GUI ile Kurulum (Graphical install)
 
 ### 2A.1 USB'den Başlat
 
@@ -85,64 +87,39 @@ Yeniden başlat.
 
 ---
 
-## 2B. Terminal ile Kurulum (Install)
+## ⌨️ 2B. Terminal ile Kurulum (Install)
 
 ### 2B.1 USB'den Başlat
 
 Bilgisayarı USB'den boot et. Menüden **Install** (metin tabanlı) seçeneğini seç.
 
-### 2B.2 Dil ve Bölge
+### 2B.2 Dil, Klavye, Ağ ve Kullanıcı
 
-Metin menüsünde Türkçe dil, Türkiye bölge, `tr_TR.UTF-8` seç.
+Menü adımları 2A.3 – 2A.6 ile aynıdır; yalnızca arayüz metin tabanlıdır. Kablolu bağlantı önerilir (Wi-Fi firmware gerektirebilir).
 
-### 2B.3 Klavye
+### 2B.3 Disk Bölümleme
 
-Türkçe Q klavye seç.
+**Guided — use entire disk** seçeneği en kolayıdır. Elle bölümleme için **Manual** seç ve 2A.7'deki tabloyu kullan.
 
-### 2B.4 Ağ Yapılandırması
-
-Hostname belirle. Wi-Fi varsa ağ seç (kablolu önerilir, Wi-Fi firmware gerektirebilir).
-
-### 2B.5 Kullanıcı ve Şifre
-
-Root şifresi ve normal kullanıcı oluştur.
-
-### 2B.6 Disk Bölümleme
-
-**Guided — use entire disk** seçeneği en kolayıdır. Manuel bölümleme için **Manual** seç:
-
-| Bölüm | Boyut | Tür | Bağlama Noktası |
-|-------|-------|-----|-----------------|
-| `/dev/sda1` | 512 MB | EFI | `/boot/efi` |
-| `/dev/sda2` | 2 GB | swap | — |
-| `/dev/sda3` | Kalan | ext4 | `/` |
-
-### 2B.7 Paket Seçimi
+### 2B.4 Paket Seçimi
 
 Masaüstü ortamı seç (GNOME, XFCE, KDE vb.) veya **"Debian desktop environment"** işaretini kaldırıp sadece **"Standard system utilities"** ile minimal kurulum yap.
 
-### 2B.8 GRUB
+### 2B.5 GRUB
 
 GRUB'u MBR'ye (veya UEFI'de EFI bölümüne) kur.
 
-### 2B.9 Kurulumu Tamamla
+### 2B.6 Kurulumu Tamamla
 
 Yeniden başlat.
 
 ---
 
-## 3. Kurulum Sonrası (her iki yöntem için ortak)
+## 🔧 3. Kurulum Sonrası (her iki yöntem için ortak)
 
-### 3.1 Güncelleme
+### 3.1 `sudo` Kurulumu
 
-```bash
-sudo apt update
-sudo apt upgrade -y
-```
-
-### 3.2 `sudo` Kurulumu
-
-Debian varsayılan olarak `sudo` ile gelmez. Root olarak:
+Kurulumda root şifresi belirlediysen Debian `sudo` ile gelmez. Root olarak kur:
 
 ```bash
 su -
@@ -151,23 +128,42 @@ usermod -aG sudo kullanici
 exit
 ```
 
-### 3.3 Depo Yapılandırması
+> `usermod` ile eklenen grup, oturumu kapatıp açınca (veya yeniden başlatınca) geçerli olur.
 
-`/etc/apt/sources.list` dosyasını düzenle:
+### 3.2 Güncelleme
 
 ```bash
-sudo nano /etc/apt/sources.list
+sudo apt update
+sudo apt upgrade -y
 ```
 
-Örnek (Debian 12 "Bookworm"):
+### 3.3 Depo Yapılandırması
+
+Debian 13 "Trixie" ve sonrasında depolar `/etc/apt/sources.list.d/debian.sources` dosyasında (deb822 biçimi) tutulur. Dosya genellikle kurulumla hazır gelir; eksik bileşenleri eklemen yeterli:
+
+```bash
+sudo nano /etc/apt/sources.list.d/debian.sources
+```
+
+Örnek:
 
 ```text
-deb http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
-deb http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware
-deb http://security.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware
+Types: deb
+URIs: http://deb.debian.org/debian
+Suites: trixie trixie-updates
+Components: main contrib non-free non-free-firmware
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+
+Types: deb
+URIs: http://security.debian.org/debian-security
+Suites: trixie-security
+Components: main contrib non-free non-free-firmware
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 ```
 
 > `non-free-firmware` özellikle Wi-Fi ve ekran kartı sürücüleri için önemlidir.
+
+> Debian 12 ve öncesinde klasik `/etc/apt/sources.list` dosyası kullanılır ve sürüm adı `bookworm` gibi yazılır.
 
 ### 3.4 Firmware Kurulumu
 
@@ -177,7 +173,7 @@ Wi-Fi veya ekran kartı sorunu varsa:
 sudo apt install firmware-linux firmware-iwlwifi
 ```
 
-## 4. Uygulama Kurulumu
+## 📦 4. Uygulama Kurulumu
 
 ### 4.1 VLC
 
@@ -224,7 +220,7 @@ sudo apt install git
 sudo apt install htop
 ```
 
-## 5. APT Referansı
+## 📖 5. APT Referansı
 
 Debian'ın paket yöneticisi **apt**'tir.
 
@@ -246,14 +242,6 @@ Debian'ın paket yöneticisi **apt**'tir.
 
 ### Örnek Senaryolar
 
-**Sistemi güncelle ve temizle:**
-
-```bash
-sudo apt update
-sudo apt upgrade -y
-sudo apt autoremove -y
-```
-
 **Paketi tamamen kaldır:**
 
 ```bash
@@ -261,7 +249,7 @@ sudo apt purge vlc
 sudo apt autoremove -y
 ```
 
-## 6. Eski Bilgisayarlar İçin
+## 🐢 6. Eski Bilgisayarlar İçin
 
 Debian, hafif masaüstü ortamlarıyla eski cihazlarda çalışır.
 
@@ -273,18 +261,11 @@ Debian, hafif masaüstü ortamlarıyla eski cihazlarda çalışır.
 
 > Debian Stable, eski cihazlarda **çok kararlı** çalışır. Hafif masaüstü ile 1 GB RAM'de bile açılır.
 
-## 7. Sık Karşılaşılan Sorunlar
+## 🛠️ 7. Sık Karşılaşılan Sorunlar
 
 ### 7.1 `sudo: command not found`
 
-Debian varsayılan olarak `sudo` ile gelmez. Root olarak kur:
-
-```bash
-su -
-apt install sudo
-usermod -aG sudo kullanici
-exit
-```
+`sudo` kurulu değil. Çözüm için 3.1'e bak.
 
 ### 7.2 Wi-Fi görünmüyor
 
@@ -296,13 +277,7 @@ sudo apt install firmware-iwlwifi firmware-realtek
 
 ### 7.3 `apt update` GPG hatası
 
-Anahtarları yenile:
-
-```bash
-sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys <KEY>
-```
-
-> Modern Debian'da `apt-key` yerine `/etc/apt/keyrings/` altına anahtar koymak önerilir (VS Code adımında olduğu gibi).
+Depo anahtarı eksik veya eskimiş demektir. Anahtarı `apt-key` ile değil, `/etc/apt/keyrings/` altına koyarak ekle ve depo satırında `signed-by=` ile göster (4.2'deki VS Code adımları örnektir).
 
 ### 7.4 Ekran kartı sürücüsü yok
 
@@ -332,7 +307,7 @@ sudo update-grub
 
 ---
 
-**Son güncelleme:** 2026-11-26
+**Son güncelleme:** 2026-11-27
 **Kaynaklar:**
 - [Debian Resmi Kurulum Rehberi](https://www.debian.org/releases/stable/installmanual)
 - [Debian Wiki — Apt](https://wiki.debian.org/Apt)
