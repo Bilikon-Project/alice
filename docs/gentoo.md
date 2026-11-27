@@ -1,52 +1,64 @@
 # Gentoo Kurulum Rehberi
 
 Gentoo, her şeyi kaynak koddan derleyen ileri seviye bir Linux dağıtımıdır.
-Paket yöneticisi **Portage**, komutu **`emerge`**'dir.
+Paket yöneticisi **Portage**, komutu **`emerge`**'dir. Bu rehber varsayılan init sistemi **OpenRC** ile kurulumu anlatır.
 
-Bu sayfa iki ayrı rehber içerir:
+> **Özet:** Gentoo'yu 64-bit (amd64) veya 32-bit (x86) donanıma terminalden kurmayı, kernel ve bootloader ayarlarını, `emerge` komutlarını ve eski bilgisayarlar için ipuçlarını öğrenirsin. Mimariye göre değişen yerler tabloda ve ayrı alt başlıklarda gösterilir.
 
-- **64-bit (amd64):** Modern bilgisayarlar için.
-- **32-bit (x86):** Eski veya 32-bit donanımlar için.
+## 🧭 1. Mimari Seç
 
-İhtiyacın olan mimarinin bölümüne git.
+İki mimari aynı adımları izler; farklar aşağıdaki tabloda toplanmıştır. Bu tabloya aşağıdaki bölümlerden geri dönersin, tekrar yazılmaz.
 
----
+| Özellik | 64-bit (amd64) | 32-bit (x86) |
+|---------|----------------|--------------|
+| ISO | `install-amd64-minimal` | `install-x86-minimal` |
+| Stage3 | `stage3-amd64-openrc-*.tar.xz` | `stage3-i686-openrc-*.tar.xz` |
+| Genelde boot modu | UEFI | BIOS/MBR |
+| `-march` | `native` | `i686` |
+| `MAKEOPTS` (başlangıç) | `-j4` | `-j2` |
+| Resmi binary paketler | Var | Yok |
+| VS Code / VSCodium | Var | Yok |
 
-# 64-BIT (amd64) KURULUMU
+> Boot modu mimariye değil bilgisayara bağlıdır. Canlı ortamda `ls /sys/firmware/efi` çalıştır: dizin varsa **UEFI**, yoksa **BIOS** kullan.
 
-## Gereksinimler (64-bit)
+## ✅ 2. Gereksinimler
 
-- 4 GB RAM (derleme için minimum)
-- 20 GB disk alanı (kullanım amacına göre 50 GB+ önerilir)
-- 4 GB USB bellek
+| Özellik | 64-bit | 32-bit |
+|---------|--------|--------|
+| RAM (derleme için minimum) | 4 GB | 2 GB |
+| Disk | 20 GB (50 GB+ önerilir) | 10 GB (20 GB+ önerilir) |
+| USB bellek | 4 GB | 2 GB |
+
 - İnternet bağlantısı
-- Sabır (derleme uzun sürebilir)
+- Sabır (32-bit donanımda derleme daha uzun sürer)
 
-## 1. ISO İndirme (64-bit)
+## 💿 3. ISO İndirme
 
 1. [gentoo.org/downloads](https://www.gentoo.org/downloads/) adresine git
-2. **amd64** mimarisi için **minimal installation CD** indir (`install-amd64-minimal`)
+2. 1. bölümdeki tabloya göre **minimal installation CD** indir
 3. Ventoy veya Rufus ile USB'ye yaz
 
-> Gentoo, canlı masaüstü yerine **minimal** bir kurulum ortamı sunar. Kurulum terminalden yapılır.
+> Gentoo, canlı masaüstü yerine **minimal** bir kurulum ortamı sunar. Kurulum terminalden yapılır. İndirme sayfasında doğru mimari sekmesini (amd64 / x86) seçtiğinden emin ol.
 
-## 2. Disk Hazırlığı (64-bit)
+## 🚀 4. Kurulum
 
-Diskini bölümle:
+Tüm adımlar USB'den açılan minimal ortamda, root olarak yapılır.
+
+### 4.1 Disk Hazırlığı
+
+Disk adını `lsblk` ile bul, ardından bölümle:
 
 ```bash
 parted /dev/sda
 ```
 
-Örnek bölümleme (UEFI):
+**UEFI için örnek bölümleme:**
 
 | Bölüm | Boyut | Tür | Bağlama Noktası |
 |-------|-------|-----|-----------------|
 | `/dev/sda1` | 512 MB | EFI | `/efi` |
 | `/dev/sda2` | 2 GB | swap | — |
 | `/dev/sda3` | Kalan | ext4 | `/` |
-
-Dosya sistemlerini oluştur ve bağla:
 
 ```bash
 mkfs.fat -F32 /dev/sda1
@@ -58,270 +70,12 @@ mkdir /mnt/gentoo/efi
 mount /dev/sda1 /mnt/gentoo/efi
 ```
 
-## 3. Stage3 Tarball (64-bit)
-
-**amd64** Stage3 arşivini indir ve çıkar:
-
-```bash
-cd /mnt/gentoo
-tar xpvf stage3-amd64-*.tar.xz --xattrs-include='*.*' --numeric-owner
-```
-
-## 4. Portage Yapılandırması (64-bit)
-
-`make.conf` dosyasını düzenle:
-
-```bash
-nano /mnt/gentoo/etc/portage/make.conf
-```
-
-Örnek:
-
-```bash
-COMMON_FLAGS="-O2 -pipe -march=native"
-MAKEOPTS="-j$(nproc)"
-```
-
-## 5. Chroot Ortamına Geç (64-bit)
-
-```bash
-mount --types proc /proc /mnt/gentoo/proc
-mount --rbind /sys /mnt/gentoo/sys
-mount --rbind /dev /mnt/gentoo/dev
-mount --bind /run /mnt/gentoo/run
-chroot /mnt/gentoo /bin/bash
-source /etc/profile
-export PS1="(chroot) ${PS1}"
-```
-
-## 6. Kernel Derleme (64-bit)
-
-```bash
-emerge --ask sys-kernel/gentoo-sources
-cd /usr/src/linux
-make menuconfig
-make && make modules_install
-make install
-```
-
-## 7. Bootloader (64-bit)
-
-GRUB'u UEFI için kur:
-
-```bash
-emerge --ask sys-boot/grub
-grub-install --target=x86_64-efi --efi-directory=/efi
-grub-mkconfig -o /boot/grub/grub.cfg
-```
-
-## 8. Kurulum Sonrası (64-bit)
-
-### 8.1 Kök Şifresi ve Kullanıcı
-
-```bash
-passwd
-useradd -m -G wheel -s /bin/bash kullanici
-passwd kullanici
-```
-
-### 8.2 Temel Paketler
-
-```bash
-emerge --ask app-admin/sudo net-misc/networkmanager
-```
-
-`sudo` için `wheel` grubunu yetkilendir:
-
-```bash
-visudo
-# %wheel ALL=(ALL:ALL) ALL satırının başındaki # işaretini kaldır
-```
-
-### 8.3 Güncelleme
-
-```bash
-emerge --sync
-emerge --ask --update --deep --newuse @world
-```
-
-## 9. Uygulama Kurulumu (64-bit)
-
-### 9.1 VLC
-
-```bash
-emerge --ask media-video/vlc
-```
-
-### 9.2 Visual Studio Code
-
-VS Code, Gentoo resmi deposunda **yoktur**. Üç seçenek vardır:
-
-**Seçenek 1 — Flatpak (önerilen):**
-
-```bash
-emerge --ask sys-apps/flatpak
-flatpak install flathub com.visualstudio.code
-```
-
-**Seçenek 2 — Overlay (VSCodium):**
-
-```bash
-emerge --ask app-eselect/eselect-repository
-eselect repository enable guru
-emerge --sync
-emerge --ask app-editors/vscodium
-```
-
-**Seçenek 3 — Resmi `.tar.gz`:**
-
-```bash
-cd /opt
-wget "https://code.visualstudio.com/sha/download?build=stable&os=linux-x64" -O code.tar.gz
-tar -xzf code.tar.gz
-ln -s /opt/VSCode-linux-x64/bin/code /usr/local/bin/code
-```
-
-### 9.3 Git
-
-```bash
-emerge --ask dev-vcs/git
-```
-
-### 9.4 htop
-
-```bash
-emerge --ask sys-process/htop
-```
-
-## 10. Portage Referansı (64-bit)
-
-| Komut | Ne yapar? |
-|-------|-----------|
-| `emerge --sync` | Depo listesini günceller |
-| `emerge --ask <paket>` | Paket kurar |
-| `emerge --ask <p1> <p2>` | Birden fazla paket kurar |
-| `emerge --ask --update --deep --newuse @world` | Sistemi günceller |
-| `emerge --ask --depclean` | Gereksiz bağımlılıkları temizler |
-| `emerge --search <kelime>` | Paket arar |
-| `emerge --info <paket>` | Paket bilgisini gösterir |
-| `emerge --ask --unmerge <paket>` | Paketi kaldırır |
-| `emerge --ask --oneshot <paket>` | Paketi `@world`'e eklemeden kurar |
-| `emerge --ask --pretend <paket>` | Kurulumu simüle eder, gerçekten kurmaz |
-| `revdep-rebuild` | Bozuk bağımlılıkları onarır |
-
-### Örnek Senaryolar (64-bit)
-
-**Sistemi güncelle:**
-
-```bash
-emerge --sync
-emerge --ask --update --deep --newuse @world
-```
-
-**Paketi kaldır ve temizle:**
-
-```bash
-emerge --ask --unmerge vlc
-emerge --ask --depclean
-```
-
-## 11. Eski Bilgisayarlar İçin (64-bit)
-
-Gentoo, derleme süresi ve RAM açısından ağırdır. 2 GB RAM'li bilgisayarlarda önerilmez.
-
-- **`MAKEOPTS` ayarı:** Düşük RAM'li cihazlarda `-j1` veya `-j2` kullan, aksi halde derleme sırasında bellek yetersizliği (OOM) olabilir.
-- **`COMMON_FLAGS`:** `-march=native` yerine `-march=x86-64` kullan (daha hızlı derleme).
-- **Binary paketler:** Derleme yerine `--usepkg` ile binary paket kullanmayı dene.
-- **Takas (swap) alanı:** En az 4 GB swap önerilir.
-
-> Gentoo, düşük donanımlı bilgisayarlar için **uygun değildir**. Hafif bir masaüstü ortamı (XFCE gibi) tercih edilmeli.
-
-## 12. Sık Karşılaşılan Sorunlar (64-bit)
-
-### 12.1 `emerge` "command not found"
-
-Chroot ortamına geçmemiş olabilirsin. `/mnt/gentoo` dizininde `chroot` komutunu tekrar çalıştır.
-
-### 12.2 Derleme sırasında bellek yetersizliği (OOM)
-
-`MAKEOPTS` değerini düşür:
-
-```bash
-nano /etc/portage/make.conf
-# MAKEOPTS="-j2" veya "-j1" yap
-```
-
-### 12.3 `emerge --sync` çok yavaş
-
-Alternatif ayna kullan:
-
-```bash
-mirrorselect -i -o >> /etc/portage/make.conf
-```
-
-### 12.4 Kernel derlemesi başarısız
-
-Eksik bağımlılık olabilir:
-
-```bash
-emerge --ask --oneshot sys-devel/bc sys-devel/flex sys-devel/bison
-```
-
-### 12.5 GRUB açılışta görünmüyor
-
-EFI bölümünün doğru bağlandığından emin ol:
-
-```bash
-efibootmgr -v
-```
-
-Gerekirse GRUB'u yeniden kur:
-
-```bash
-grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=Gentoo
-grub-mkconfig -o /boot/grub/grub.cfg
-```
-
----
-
-# 32-BIT (x86) KURULUMU
-
-> Gentoo, 32-bit desteğini hâlâ sürdüren nadir dağıtımlardan biridir. Eski bilgisayarlar için uygundur.
-
-## Gereksinimler (32-bit)
-
-- 2 GB RAM (derleme için minimum)
-- 10 GB disk alanı (kullanım amacına göre 20 GB+ önerilir)
-- 2 GB USB bellek
-- İnternet bağlantısı
-- Sabır (32-bit donanımda derleme daha uzun sürer)
-
-## 1. ISO İndirme (32-bit)
-
-1. [gentoo.org/downloads](https://www.gentoo.org/downloads/) adresine git
-2. **x86** mimarisi için **minimal installation CD** indir (`install-x86-minimal`)
-3. Ventoy veya Rufus ile USB'ye yaz
-
-> İndirme sayfasında **x86** sekmesini seçtiğinden emin ol. amd64 ile karıştırma.
-
-## 2. Disk Hazırlığı (32-bit)
-
-Diskini bölümle:
-
-```bash
-parted /dev/sda
-```
-
-Örnek bölümleme (BIOS/MBR — eski donanım):
+**BIOS/MBR için örnek bölümleme:**
 
 | Bölüm | Boyut | Tür | Bağlama Noktası |
 |-------|-------|-----|-----------------|
 | `/dev/sda1` | 2 GB | swap | — |
 | `/dev/sda2` | Kalan | ext4 | `/` |
-
-> 32-bit eski donanımda genellikle UEFI yoktur, BIOS/MBR kullanılır.
-
-Dosya sistemlerini oluştur ve bağla:
 
 ```bash
 mkfs.ext4 /dev/sda2
@@ -330,18 +84,18 @@ swapon /dev/sda1
 mount /dev/sda2 /mnt/gentoo
 ```
 
-## 3. Stage3 Tarball (32-bit)
+### 4.2 Stage3 Tarball
 
-**x86 (i686)** Stage3 arşivini indir ve çıkar:
+Stage3 arşivini [gentoo.org/downloads](https://www.gentoo.org/downloads/) sayfasından indir (dosya adı için 1. bölümdeki tabloya bak), sonra çıkar:
 
 ```bash
 cd /mnt/gentoo
-tar xpvf stage3-i686-*.tar.xz --xattrs-include='*.*' --numeric-owner
+tar xpvf stage3-*.tar.xz --xattrs-include='*.*' --numeric-owner
 ```
 
-> 32-bit Stage3 dosya adı `stage3-i686-*.tar.xz` şeklindedir (amd64 değil).
+> Dizinde yalnızca indirdiğin tek Stage3 dosyası olmalı; birden fazla varsa `*` yerine tam adı yaz.
 
-## 4. Portage Yapılandırması (32-bit)
+### 4.3 Portage Yapılandırması
 
 `make.conf` dosyasını düzenle:
 
@@ -349,92 +103,194 @@ tar xpvf stage3-i686-*.tar.xz --xattrs-include='*.*' --numeric-owner
 nano /mnt/gentoo/etc/portage/make.conf
 ```
 
-Örnek (32-bit için `-march` daha muhafazakâr):
-
 ```bash
-COMMON_FLAGS="-O2 -pipe -march=i686"
-MAKEOPTS="-j2"
+COMMON_FLAGS="-O2 -pipe -march=native"
+MAKEOPTS="-j4"
 ```
 
-> 32-bit donanımda `-march=native` yerine `-march=i686` veya `-march=pentium4` kullan. `MAKEOPTS` değerini düşük tut (RAM az).
+> 32-bit için `-march=i686` yaz. `MAKEOPTS` sayısı çekirdek sayını ve iş başına ~2 GB RAM'i geçmemeli. `make.conf` komut çalıştırmaz, bu yüzden `$(nproc)` yazma; sayıyı elle gir.
 
-## 5. Chroot Ortamına Geç (32-bit)
+### 4.4 Chroot Ortamına Geç
 
 ```bash
+cp --dereference /etc/resolv.conf /mnt/gentoo/etc/
 mount --types proc /proc /mnt/gentoo/proc
 mount --rbind /sys /mnt/gentoo/sys
+mount --make-rslave /mnt/gentoo/sys
 mount --rbind /dev /mnt/gentoo/dev
+mount --make-rslave /mnt/gentoo/dev
 mount --bind /run /mnt/gentoo/run
+mount --make-slave /mnt/gentoo/run
 chroot /mnt/gentoo /bin/bash
 source /etc/profile
 export PS1="(chroot) ${PS1}"
 ```
 
-## 6. Kernel Derleme (32-bit)
+### 4.5 Portage ve Profil
+
+Depo anlık görüntüsünü indir, profil seç ve sistemi güncelle:
+
+```bash
+emerge-webrsync
+eselect profile list
+eselect profile set <numara>
+emerge --ask --update --deep --newuse @world
+```
+
+> Başlangıç için OpenRC kullanan, güncel (`23.0` gibi) varsayılan profili seç; masaüstü profilleri de listede olur. Son komut uzun sürebilir.
+
+### 4.6 Saat Dilimi ve Dil
+
+```bash
+echo "Europe/Istanbul" > /etc/timezone
+emerge --config sys-libs/timezone-data
+nano /etc/locale.gen
+# tr_TR.UTF-8 UTF-8 ve en_US.UTF-8 UTF-8 satırlarını ekle
+locale-gen
+eselect locale list
+eselect locale set <numara>
+env-update && source /etc/profile && export PS1="(chroot) ${PS1}"
+```
+
+### 4.7 Kernel
+
+Önce firmware ve `installkernel` kur:
+
+```bash
+mkdir -p /etc/portage/package.license
+echo "sys-kernel/linux-firmware linux-fw-redistributable no-source-code" > /etc/portage/package.license/linux-firmware
+emerge --ask sys-kernel/linux-firmware sys-kernel/installkernel
+```
+
+**Seçenek A — Hazır kernel (önerilen, hızlı):**
+
+```bash
+emerge --ask sys-kernel/gentoo-kernel-bin
+```
+
+**Seçenek B — Elle derleme:**
 
 ```bash
 emerge --ask sys-kernel/gentoo-sources
+eselect kernel list
+eselect kernel set 1
 cd /usr/src/linux
 make menuconfig
-make && make modules_install
+make -j"$(nproc)"
+make modules_install
 make install
 ```
 
-> 32-bit için kernel yapılandırmasında `Processor type and features → High Memory Support` ayarını **4GB** veya **off** yap (donanıma göre).
+> İpucu: Seçenek B'de initramfs kullanmayacaksan kök dosya sistemi (ext4) ve disk sürücüsünü modül değil, **yerleşik** (`=y`) seç. 32-bit için `Processor type and features → High Memory Support` ayarını RAM'ine göre **4GB** veya **off** yap.
 
-## 7. Bootloader (32-bit)
+### 4.8 Sistem Yapılandırması
 
-BIOS/MBR için GRUB'u kur:
+`fstab` için bölüm UUID'lerini öğren ve dosyayı düzenle:
 
 ```bash
+blkid
+nano /etc/fstab
+```
+
+```text
+UUID=<EFI-UUID>   /efi  vfat  umask=0077        0 2
+UUID=<SWAP-UUID>  none  swap  sw                0 0
+UUID=<ROOT-UUID>  /     ext4  defaults,noatime  0 1
+```
+
+> BIOS kullanıyorsan `/efi` satırını yazma.
+
+Bilgisayar adı ve klavye:
+
+```bash
+echo 'hostname="gentoo"' > /etc/conf.d/hostname
+echo 'keymap="trq"' > /etc/conf.d/keymaps
+```
+
+### 4.9 Kullanıcı ve Temel Paketler
+
+```bash
+passwd
+emerge --ask app-admin/sudo net-misc/networkmanager
+rc-update add NetworkManager default
+useradd -m -G wheel -s /bin/bash kullanici
+passwd kullanici
+visudo
+# %wheel ALL=(ALL:ALL) ALL satırının başındaki # işaretini kaldır
+```
+
+### 4.10 Bootloader
+
+**UEFI:**
+
+```bash
+echo 'GRUB_PLATFORMS="efi-64"' >> /etc/portage/make.conf
+emerge --ask sys-boot/grub sys-boot/efibootmgr
+grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=Gentoo
+grub-mkconfig -o /boot/grub/grub.cfg
+```
+
+**BIOS/MBR:**
+
+```bash
+echo 'GRUB_PLATFORMS="pc"' >> /etc/portage/make.conf
 emerge --ask sys-boot/grub
 grub-install --target=i386-pc /dev/sda
 grub-mkconfig -o /boot/grub/grub.cfg
 ```
 
-> 32-bit eski donanımda `--target=i386-pc` kullanılır (UEFI değil).
-
-## 8. Kurulum Sonrası (32-bit)
-
-### 8.1 Kök Şifresi ve Kullanıcı
+### 4.11 Çıkış ve Yeniden Başlat
 
 ```bash
-passwd
-useradd -m -G wheel -s /bin/bash kullanici
-passwd kullanici
+exit
+cd
+umount -l /mnt/gentoo/dev{/shm,/pts,}
+umount -R /mnt/gentoo
+reboot
 ```
 
-### 8.2 Temel Paketler
+## 🔧 5. Kurulum Sonrası
+
+Kullanıcınla giriş yap ve ağı kontrol et:
 
 ```bash
-emerge --ask app-admin/sudo net-misc/networkmanager
+ping -c 3 gentoo.org
 ```
 
-`sudo` için `wheel` grubunu yetkilendir:
+Wi-Fi için `nmtui` kullan. Güncelleme ve paket yönetimi komutları 7. bölümdeki tabloda.
 
-```bash
-visudo
-# %wheel ALL=(ALL:ALL) ALL satırının başındaki # işaretini kaldır
-```
+## 📦 6. Uygulama Kurulumu
 
-### 8.3 Güncelleme
-
-```bash
-emerge --sync
-emerge --ask --update --deep --newuse @world
-```
-
-## 9. Uygulama Kurulumu (32-bit)
-
-### 9.1 VLC
+### 6.1 VLC
 
 ```bash
 emerge --ask media-video/vlc
 ```
 
-### 9.2 Metin Editörü
+### 6.2 Metin Editörü
 
-32-bit sistemde VS Code resmi binary **yoktur**. Hafif editör önerilir:
+**64-bit:** VSCodium resmi depoda bulunur:
+
+```bash
+emerge --ask app-editors/vscodium
+```
+
+Microsoft'un VS Code'unu istersen `app-editors/vscode` paketi lisans onayı ister; paket test (`~amd64`) olarak işaretliyse Portage keyword ekleme talimatı verir:
+
+```bash
+echo "app-editors/vscode Microsoft-vscode" > /etc/portage/package.license/vscode
+emerge --ask app-editors/vscode
+```
+
+Flatpak ile de kurulabilir:
+
+```bash
+emerge --ask sys-apps/flatpak
+flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+flatpak install flathub com.visualstudio.code
+```
+
+**32-bit:** VS Code için 32-bit sürüm yoktur; hafif bir editör kur:
 
 ```bash
 emerge --ask app-editors/vim
@@ -446,42 +302,37 @@ veya:
 emerge --ask app-editors/neovim
 ```
 
-### 9.3 Git
+### 6.3 Git
 
 ```bash
 emerge --ask dev-vcs/git
 ```
 
-### 9.4 htop
+### 6.4 htop
 
 ```bash
 emerge --ask sys-process/htop
 ```
 
-## 10. Portage Referansı (32-bit)
+## 📖 7. Portage Referansı
 
 | Komut | Ne yapar? |
 |-------|-----------|
+| `emerge-webrsync` | Depo anlık görüntüsünü indirir (ilk kurulumda) |
 | `emerge --sync` | Depo listesini günceller |
 | `emerge --ask <paket>` | Paket kurar |
 | `emerge --ask <p1> <p2>` | Birden fazla paket kurar |
+| `emerge --ask --getbinpkg <paket>` | Resmi binary paketi indirip kurar (yalnızca amd64) |
 | `emerge --ask --update --deep --newuse @world` | Sistemi günceller |
 | `emerge --ask --depclean` | Gereksiz bağımlılıkları temizler |
 | `emerge --search <kelime>` | Paket arar |
-| `emerge --info <paket>` | Paket bilgisini gösterir |
+| `emerge --info` | Sistemin derleme ayarlarını gösterir |
 | `emerge --ask --unmerge <paket>` | Paketi kaldırır |
 | `emerge --ask --oneshot <paket>` | Paketi `@world`'e eklemeden kurar |
-| `emerge --ask --pretend <paket>` | Kurulumu simüle eder, gerçekten kurmaz |
-| `revdep-rebuild` | Bozuk bağımlılıkları onarır |
+| `emerge --pretend <paket>` | Kurulumu simüle eder, gerçekten kurmaz |
+| `revdep-rebuild` | Bozuk bağımlılıkları onarır (`app-portage/gentoolkit` gerekir) |
 
-### Örnek Senaryolar (32-bit)
-
-**Sistemi güncelle:**
-
-```bash
-emerge --sync
-emerge --ask --update --deep --newuse @world
-```
+### Örnek Senaryo
 
 **Paketi kaldır ve temizle:**
 
@@ -490,24 +341,24 @@ emerge --ask --unmerge vlc
 emerge --ask --depclean
 ```
 
-## 11. Eski Bilgisayarlar İçin (32-bit)
+## 🐢 8. Eski Bilgisayarlar İçin
 
-32-bit donanım zaten eski olduğu için derleme süresi uzundur.
+Gentoo, derleme süresi ve RAM açısından ağırdır. 2 GB altı RAM'de önerilmez.
 
-- **`MAKEOPTS` ayarı:** `-j1` veya `-j2` kullan. 32-bit cihazlarda RAM genelde azdır.
-- **`COMMON_FLAGS`:** `-march=native` yerine `-march=i686` kullan.
-- **Binary paketler:** Derleme yerine `--usepkg` ile binary paket kullanmayı dene.
-- **Takas (swap) alanı:** En az 2 GB swap önerilir.
+- **`MAKEOPTS`:** `-j1` veya `-j2` kullan, aksi halde derleme sırasında bellek yetersizliği (OOM) olabilir.
+- **Takas (swap) alanı:** En az 2 GB, büyük paketler için 4 GB önerilir.
+- **Binary paketler:** Resmi binary paket sunucusu yalnızca amd64 ve arm64 için vardır; 64-bit'te `--getbinpkg` ile derleme süresini kısaltabilirsin. 32-bit'te derleme gerekir (saatler sürebilir).
+- **Hafif masaüstü:** XFCE gibi hafif bir ortam seç.
 
-> 32-bit Gentoo, sabır işidir. Derleme saatler sürebilir. Mümkünse binary paket kullan.
+> Gentoo, düşük donanımlı bilgisayarlar için **uygun değildir**; mümkünse binary paket ve hafif masaüstü kullan.
 
-## 12. Sık Karşılaşılan Sorunlar (32-bit)
+## 🛠️ 9. Sık Karşılaşılan Sorunlar
 
-### 12.1 `emerge` "command not found"
+### 9.1 `emerge` "command not found"
 
-Chroot ortamına geçmemiş olabilirsin. `/mnt/gentoo` dizininde `chroot` komutunu tekrar çalıştır.
+Chroot ortamına geçmemiş olabilirsin. 4.4'teki adımları tekrar uygula.
 
-### 12.2 Derleme sırasında bellek yetersizliği (OOM)
+### 9.2 Derleme sırasında bellek yetersizliği (OOM)
 
 `MAKEOPTS` değerini düşür:
 
@@ -516,15 +367,16 @@ nano /etc/portage/make.conf
 # MAKEOPTS="-j1" yap
 ```
 
-### 12.3 `emerge --sync` çok yavaş
+### 9.3 `emerge --sync` çok yavaş
 
-Alternatif ayna kullan:
+Alternatif ayna seç:
 
 ```bash
+emerge --ask app-portage/mirrorselect
 mirrorselect -i -o >> /etc/portage/make.conf
 ```
 
-### 12.4 Kernel derlemesi başarısız
+### 9.4 Kernel derlemesi başarısız
 
 Eksik bağımlılık olabilir:
 
@@ -532,29 +384,26 @@ Eksik bağımlılık olabilir:
 emerge --ask --oneshot sys-devel/bc sys-devel/flex sys-devel/bison
 ```
 
-### 12.5 GRUB açılışta görünmüyor
+### 9.5 GRUB açılışta görünmüyor
 
-BIOS/MBR kurulumunu kontrol et:
+UEFI'de EFI girişini, BIOS'ta bölüm tablosunu kontrol et:
 
 ```bash
+efibootmgr -v
 fdisk -l /dev/sda
 ```
 
-Gerekirse GRUB'u yeniden kur:
+Gerekirse 4.10'daki GRUB adımlarını tekrar uygula.
 
-```bash
-grub-install --target=i386-pc /dev/sda
-grub-mkconfig -o /boot/grub/grub.cfg
-```
+### 9.6 Stage3 bulunamıyor
 
-### 12.6 32-bit Stage3 bulunamıyor
-
-Gentoo, 32-bit için `stage3-i686-*.tar.xz` dosyasını sunar. `amd64` ile karıştırma. İndirme sayfasında **x86** sekmesini seç.
+Mimarini karıştırmış olabilirsin. Doğru dosya adı için 1. bölümdeki tabloya bak ve indirme sayfasında doğru mimari sekmesini seç.
 
 ---
 
+**Son güncelleme:** 2026-11-27
 **Kaynaklar:**
 - [Gentoo Handbook (amd64)](https://wiki.gentoo.org/wiki/Handbook:AMD64)
 - [Gentoo Handbook (x86)](https://wiki.gentoo.org/wiki/Handbook:X86)
 - [Gentoo Wiki — Portage](https://wiki.gentoo.org/wiki/Portage)
-- [Gentoo Wiki — Installation](https://wiki.gentoo.org/wiki/Installation)
+- [Gentoo Wiki — Binary package quickstart](https://wiki.gentoo.org/wiki/Binary_package_quickstart)
